@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>Bot Status</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--fg:#1b1f2a;--mut:#6b7280;--bd:#e5e7eb;--acc:#4f46e5;--sh:0 1px 3px rgba(0,0,0,.06)}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1117;--card:#181b24;--fg:#e6e8ee;--mut:#9aa1ae;--bd:#2a2f3c;--acc:#818cf8;--sh:none}}
+:root[data-t=light]{--bg:#f6f7fb;--card:#fff;--fg:#1b1f2a;--mut:#6b7280;--bd:#e5e7eb;--acc:#4f46e5}
+:root[data-t=dark]{--bg:#0f1117;--card:#181b24;--fg:#e6e8ee;--mut:#9aa1ae;--bd:#2a2f3c;--acc:#818cf8}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--fg)}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+h1{font-size:18px;margin:0 12px 0 0}input,select,textarea,button{font:inherit;color:inherit;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:7px 10px}
+button{cursor:pointer}button.p{background:var(--acc);color:#fff;border-color:var(--acc)}#q{flex:1;min-width:140px}
+main{padding:16px;max-width:1500px;margin:auto}.grp{margin-bottom:22px}.grp h2{font-size:14px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin:0 0 8px;display:flex;gap:8px;align-items:center}
+.cnt{background:var(--bd);border-radius:99px;padding:0 8px;font-size:12px;color:var(--fg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.c{background:var(--card);border:1px solid var(--bd);border-left:4px solid var(--s);border-radius:10px;padding:12px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:6px}
+.c.flash{animation:fl 1.2s}@keyframes fl{from{box-shadow:0 0 0 3px var(--acc)}}
+.t{font-weight:600}.m{display:flex;gap:6px;flex-wrap:wrap;font-size:12px}.tag{border:1px solid var(--bd);border-radius:99px;padding:1px 8px;color:var(--mut)}
+.n{white-space:pre-wrap}.r{font-size:12px;color:var(--mut);word-break:break-word}.note{font-size:13px;border-left:2px solid var(--bd);padding-left:8px;color:var(--mut);white-space:pre-wrap}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.row select{padding:4px 6px;font-size:13px}.lk{background:none;border:0;color:var(--acc);padding:2px 4px;font-size:13px}
+textarea{width:100%;min-height:60px}#login{max-width:360px;margin:12vh auto;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:10px}
+#msg{color:var(--mut);font-size:13px}.hide{display:none!important}.ts{font-size:11px;color:var(--mut);margin-left:auto}
+#live{width:8px;height:8px;border-radius:50%;background:#9ca3af}#live.on{background:#22c55e}
+</style></head><body>
+<div id="login" class="hide"><h1>Bot Status</h1><div id="msg">Sign in with your email. You'll get a magic link and a 6-digit code.</div>
+<input id="em" type="email" value="mail.maxlu@gmail.com" autocomplete="email"><button class="p" id="send">Send link / code</button>
+<div id="otpbox" class="hide row"><input id="otp" inputmode="numeric" placeholder="6-digit code" style="flex:1"><button class="p" id="verify">Verify</button></div></div>
+<div id="app" class="hide"><header><h1>Bot Status</h1><span id="live" title="live updates"></span>
+<input id="q" placeholder="Search…" type="search"><select id="fb"><option value="">All bots</option></select><select id="fa"><option value="">All areas</option></select>
+<label class="row" style="font-size:13px"><input type="checkbox" id="sd" checked> Done</label>
+<button id="th" title="Theme">◐</button><button id="out">Sign out</button></header><main id="main"></main></div>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const sb=createClient('https://uiljhtpohsthjibcyher.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpbGpodHBvaHN0aGppYmN5aGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjE2MDQsImV4cCI6MjEwNzYzNzYwNH0.i2uZfVUBK97G-y29EbVq1SiOb78ur7oOXL_30CMJOxY');
+const ST=[['blocked_max','Blocked on Max','#ef4444'],['blocked_other','Blocked (other)','#f59e0b'],['in_progress','In progress','#3b82f6'],['waiting','Waiting','#a855f7'],['paused','Paused','#9ca3af'],['done','Done','#22c55e']];
+const $=s=>document.querySelector(s),esc=s=>(s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let items=new Map(),flash=new Set();
+const th=localStorage.th;if(th)document.documentElement.dataset.t=th;
+$('#th').onclick=()=>{const n=(document.documentElement.dataset.t||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'))==='dark'?'light':'dark';document.documentElement.dataset.t=n;localStorage.th=n};
+const em=()=>$('#em').value.trim();
+$('#send').onclick=async()=>{$('#msg').textContent='Sending…';const{error}=await sb.auth.signInWithOtp({email:em(),options:{shouldCreateUser:false,emailRedirectTo:location.origin+location.pathname}});
+$('#msg').textContent=error?error.message:'Check your email: click the link, or enter the code here.';if(!error)$('#otpbox').classList.remove('hide')};
+$('#verify').onclick=async()=>{const{error}=await sb.auth.verifyOtp({email:em(),token:$('#otp').value.trim(),type:'email'});if(error)$('#msg').textContent=error.message};
+$('#out').onclick=()=>sb.auth.signOut();
+let chan;
+sb.auth.onAuthStateChange((_e,s)=>{$('#login').classList.toggle('hide',!!s);$('#app').classList.toggle('hide',!s);if(s&&!chan)start();if(!s&&chan){sb.removeChannel(chan);chan=null}});
+async function start(){const{data,error}=await sb.from('items').select('*').order('updated_at',{ascending:false});
+if(error){$('#main').textContent=error.message;return}items=new Map(data.map(r=>[r.id,r]));filters();render();
+chan=sb.channel('items').on('postgres_changes',{event:'*',schema:'public',table:'items'},p=>{if(p.eventType==='DELETE')items.delete(p.old.id);else{items.set(p.new.id,p.new);flash.add(p.new.id)}filters();render()}).subscribe(s=>$('#live').classList.toggle('on',s==='SUBSCRIBED'))}
+function filters(){for(const[k,el,lab]of[['bot','#fb','All bots'],['area','#fa','All areas']]){const v=$(el).value,vals=[...new Set([...items.values()].map(r=>r[k]).filter(Boolean))].sort();
+$(el).innerHTML=`<option value="">${lab}</option>`+vals.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('')}}
+['#q','#fb','#fa','#sd'].forEach(s=>$(s).addEventListener('input',render));
+const ago=t=>{const m=(Date.now()-new Date(t))/6e4;return m<60?Math.round(m)+'m':m<1440?Math.round(m/60)+'h':Math.round(m/1440)+'d'};
+function render(){const q=$('#q').value.toLowerCase(),b=$('#fb').value,a=$('#fa').value,sd=$('#sd').checked;
+const rs=[...items.values()].filter(r=>(!b||r.bot===b)&&(!a||r.area===a)&&(sd||r.status!=='done')&&(!q||[r.title,r.next,r.refs,r.bot,r.area,r.note].join(' ').toLowerCase().includes(q)));
+$('#main').innerHTML=ST.map(([k,lab,col])=>{const g=rs.filter(r=>r.status===k);if(!g.length)return'';
+return`<section class="grp"><h2><span style="color:${col}">●</span>${lab}<span class="cnt">${g.length}</span></h2><div class="grid">${g.map(r=>card(r,col)).join('')}</div></section>`}).join('')||'<p style="color:var(--mut)">Nothing matches.</p>';flash.clear()}
+function card(r,col){return`<div class="c ${flash.has(r.id)?'flash':''}" style="--s:${col}" data-id="${r.id}"><div class="t">${esc(r.title)}</div>
+<div class="m"><span class="tag">🤖 ${esc(r.bot)}</span>${r.area?`<span class="tag">${esc(r.area)}</span>`:''}<span class="ts">${ago(r.updated_at)} ago</span></div>
+${r.next?`<div class="n">${esc(r.next)}</div>`:''}${r.refs?`<div class="r">${esc(r.refs)}</div>`:''}${r.note?`<div class="note">📝 ${esc(r.note)}</div>`:''}
+<div class="row"><select data-a="st">${ST.map(([k,l])=>`<option value="${k}" ${k===r.status?'selected':''}>${l}</option>`).join('')}</select>
+<button class="lk" data-a="next">Edit next</button><button class="lk" data-a="note">${r.note?'Edit note':'Add note'}</button></div><div class="ed"></div></div>`}
+async function upd(id,patch){const{error}=await sb.from('items').update(patch).eq('id',id);if(error)alert(error.message)}
+$('#main').addEventListener('change',e=>{if(e.target.dataset.a==='st')upd(e.target.closest('.c').dataset.id,{status:e.target.value})});
+$('#main').addEventListener('click',e=>{const a=e.target.dataset.a;if(a!=='next'&&a!=='note')return;const c=e.target.closest('.c'),r=items.get(c.dataset.id),ed=c.querySelector('.ed');
+ed.innerHTML=`<textarea>${esc(r[a])}</textarea><div class="row"><button class="p">Save</button><button>Cancel</button></div>`;const[s,x]=ed.querySelectorAll('button');ed.querySelector('textarea').focus();
+x.onclick=()=>ed.innerHTML='';s.onclick=()=>upd(r.id,{[a]:ed.querySelector('textarea').value.trim()||null})});
+</script></body></html>
