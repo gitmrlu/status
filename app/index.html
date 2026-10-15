@@ -21,8 +21,8 @@ textarea{width:100%;min-height:60px}#login{max-width:360px;margin:12vh auto;back
 #msg{color:var(--mut);font-size:13px}.hide{display:none!important}.ts{font-size:11px;color:var(--mut);margin-left:auto}
 #live{width:8px;height:8px;border-radius:50%;background:#9ca3af}#live.on{background:#22c55e}
 </style></head><body>
-<div id="login" class="hide"><h1>Bot Status</h1><div id="msg">Sign in with your email. You'll get a magic link and a 6-digit code.</div>
-<input id="em" type="email" value="mail.maxlu@gmail.com" autocomplete="email"><button class="p" id="send">Send link / code</button>
+<div id="login" class="hide"><h1>Bot Status</h1><div id="msg">Sign in with your email. We'll email you a sign-in link.</div>
+<input id="em" type="email" value="mail.maxlu@gmail.com" autocomplete="email"><button class="p" id="send">Send sign-in link</button>
 <div id="otpbox" class="hide row"><input id="otp" inputmode="numeric" placeholder="6-digit code" style="flex:1"><button class="p" id="verify">Verify</button></div></div>
 <div id="app" class="hide"><header><h1>Bot Status</h1><span id="live" title="live updates"></span>
 <input id="q" placeholder="Search…" type="search"><select id="fb"><option value="">All bots</option></select><select id="fa"><option value="">All areas</option></select>
@@ -38,7 +38,7 @@ const th=localStorage.th;if(th)document.documentElement.dataset.t=th;
 $('#th').onclick=()=>{const n=(document.documentElement.dataset.t||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'))==='dark'?'light':'dark';document.documentElement.dataset.t=n;localStorage.th=n};
 const em=()=>$('#em').value.trim();
 $('#send').onclick=async()=>{$('#msg').textContent='Sending…';const{error}=await sb.auth.signInWithOtp({email:em(),options:{shouldCreateUser:false,emailRedirectTo:location.origin+location.pathname}});
-$('#msg').textContent=error?error.message:'Check your email: click the link, or enter the code here.';if(!error)$('#otpbox').classList.remove('hide')};
+$('#msg').textContent=error?error.message:'Check your email and click the sign-in link (open it in this browser).';if(!error)$('#otpbox').classList.remove('hide')};
 $('#verify').onclick=async()=>{const{error}=await sb.auth.verifyOtp({email:em(),token:$('#otp').value.trim(),type:'email'});if(error)$('#msg').textContent=error.message};
 $('#out').onclick=()=>sb.auth.signOut();
 let chan;
