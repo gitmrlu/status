@@ -291,9 +291,9 @@ function makeLabel(text,color='#94a3b8',scale=1,opts={}){
   g.fillText(t,c.width/2,c.height/2+0.5);
   const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false,opacity:opts.full?0.96:0.88}));
-  const worldH=0.58*scale;
+  const worldH=0.435*scale;
   const aspect=c.width/Math.max(1,c.height);
-  const worldW=Math.min(2.55, worldH*aspect);
+  const worldW=Math.min(1.95, worldH*aspect);
   sp.scale.set(worldW, worldH, 1);
   sp.center.set(0.5,0);
   return sp;
@@ -368,8 +368,8 @@ function buildOffice(){
   const gX0=gOx-gW/2, gX1=gOx+gW/2, gZ0=gOz-gD/2, gZ1=gOz+gD/2;
   function glassMat(){
     return new THREE.MeshStandardMaterial({
-      color:0xa5f3fc, transparent:true, opacity:0.38, roughness:0.18, metalness:0.25,
-      depthWrite:false, emissive:0x22d3ee, emissiveIntensity:0.28, side:THREE.DoubleSide
+      color:0xa5f3fc, transparent:true, opacity:0.10, roughness:0.18, metalness:0.25,
+      depthWrite:false, emissive:0x22d3ee, emissiveIntensity:0.12, side:THREE.DoubleSide
     });
   }
   function addGlassPanel(w,h,d,x,y,z){
@@ -383,19 +383,19 @@ function buildOffice(){
   }
   function framedGlassX(x,z0,z1){ // vertical panel in X (wall along Z)
     const depth=z1-z0, cz=(z0+z1)/2;
-    addGlassPanel(0.06,glassH,depth, x,glassY,cz);
-    addFrame(0.1,0.08,depth+0.12, x,glassY+glassH/2,cz);
-    addFrame(0.1,0.08,depth+0.12, x,glassY-glassH/2,cz);
-    addFrame(0.1,glassH+0.08,0.08, x,glassY,z0);
-    addFrame(0.1,glassH+0.08,0.08, x,glassY,z1);
+    addGlassPanel(0.04,glassH,depth, x,glassY,cz);
+    addFrame(0.05,0.05,depth+0.08, x,glassY+glassH/2,cz);
+    addFrame(0.05,0.05,depth+0.08, x,glassY-glassH/2,cz);
+    addFrame(0.05,glassH+0.05,0.05, x,glassY,z0);
+    addFrame(0.05,glassH+0.05,0.05, x,glassY,z1);
   }
   function framedGlassZ(z,x0,x1){ // vertical panel in Z (wall along X)
     const width=x1-x0, cx=(x0+x1)/2;
-    addGlassPanel(width,glassH,0.06, cx,glassY,z);
-    addFrame(width+0.12,0.08,0.1, cx,glassY+glassH/2,z);
-    addFrame(width+0.12,0.08,0.1, cx,glassY-glassH/2,z);
-    addFrame(0.08,glassH+0.08,0.1, x0,glassY,z);
-    addFrame(0.08,glassH+0.08,0.1, x1,glassY,z);
+    addGlassPanel(width,glassH,0.04, cx,glassY,z);
+    addFrame(width+0.08,0.05,0.05, cx,glassY+glassH/2,z);
+    addFrame(width+0.08,0.05,0.05, cx,glassY-glassH/2,z);
+    addFrame(0.05,glassH+0.05,0.05, x0,glassY,z);
+    addFrame(0.05,glassH+0.05,0.05, x1,glassY,z);
   }
   // Full enclosure; doorway gap on east wall toward desks (south half open)
   framedGlassZ(gZ0, gX0, gX1);           // north
@@ -403,8 +403,8 @@ function buildOffice(){
   framedGlassZ(gZ1, gX0, gX1);           // south
   framedGlassX(gX1, gZ0, (gZ0+gZ1)/2);   // east — north half only (doorway)
   // door frame posts
-  addFrame(0.12,glassH+0.1,0.12, gX1,glassY,(gZ0+gZ1)/2);
-  addFrame(0.12,glassH+0.1,0.12, gX1,glassY,gZ1);
+  addFrame(0.06,glassH+0.06,0.06, gX1,glassY,(gZ0+gZ1)/2);
+  addFrame(0.06,glassH+0.06,0.06, gX1,glassY,gZ1);
   const leadDesk=box(2.2,0.4,1.1,0x1e293b,{x:-10.2,y:0.45,z:-7.2});root.add(leadDesk);
   const mon=box(1.2,0.75,0.08,0x0f172a,{x:-10.2,y:1.0,z:-7.65,emissive:0xf43f5e,ei:0.6});root.add(mon);
   zoneMeshes.needs={origin:new THREE.Vector3(-6.8,0,-3.6),w:12.5,d:10.2};
@@ -419,12 +419,9 @@ function buildOffice(){
   const bossPlate=floorLabel('MAX','#E8C547');bossPlate.scale.set(0.42,0.42,0.42);bossPlate.position.set(bossX,0.05,bossZ+1.35);root.add(bossPlate);
   maxStandPos=new THREE.Vector3(bossX,0,bossZ-0.95);
   maxDeskFront=new THREE.Vector3(bossX,0,bossZ+1.15);
-  maxPerson=makeActor('#E8C547','blob','crown');
+  maxPerson=makeMaxPerson();
   maxPerson.userData.isMax=true;maxPerson.userData.bot=null;
-  maxPerson.userData.ring.material.color.setHex(MAX_GOLD);
-  maxPerson.userData.ring.material.emissive.setHex(MAX_GOLD);
-  maxPerson.userData.ring.material.emissiveIntensity=1.1;
-  const maxLab=makeLabel('Max','#E8C547',1.05,{full:true});maxLab.position.set(0,1.75,0);maxPerson.add(maxLab);
+  const maxLab=makeLabel('Max','#E8C547',0.8,{full:true});maxLab.position.set(0,1.85,0);maxPerson.add(maxLab);
   maxPerson.position.copy(maxStandPos);
   maxPerson.rotation.y=0;
   root.add(maxPerson);
@@ -438,7 +435,9 @@ function buildOffice(){
     const x=0.8+(i%3)*3.2,z=-6.2+Math.floor(i/3)*2.6;
     root.add(box(1.6,0.35,0.9,0x334155,{x,y:0.4,z}));
     root.add(box(0.9,0.55,0.06,0x0f172a,{x,y:0.9,z:z-0.4,emissive:0x38bdf8,ei:0.7}));
-    root.add(box(0.45,0.55,0.45,0x1e293b,{x:x+0.7,y:0.45,z:z+0.55}));
+    // low open-plan chair (no freestanding cubicle/divider pedestals)
+    root.add(box(0.48,0.12,0.48,0x1e293b,{x:x+0.7,y:0.28,z:z+0.55}));
+    root.add(box(0.48,0.32,0.06,0x334155,{x:x+0.7,y:0.5,z:z+0.76}));
   }
 
   // LOUNGE — waiting
@@ -448,9 +447,10 @@ function buildOffice(){
   // rug + sofa
   const rug=new THREE.Mesh(new THREE.CircleGeometry(2.2,32),new THREE.MeshStandardMaterial({color:0x166534,roughness:1}));
   rug.rotation.x=-Math.PI/2;rug.position.set(-7.5,0.04,4.8);root.add(rug);
-  root.add(box(3.2,0.55,1.1,0x4b5563,{x:-8.4,y:0.45,z:4.0}));
-  root.add(box(1.1,0.55,2.4,0x4b5563,{x:-6.2,y:0.45,z:5.2}));
-  root.add(box(1.0,0.25,1.0,0x78716c,{x:-7.5,y:0.3,z:5.0}));
+  // open lounge seating (low sofas — no tall divider panels)
+  root.add(box(3.2,0.42,1.1,0x4b5563,{x:-8.4,y:0.38,z:4.0}));
+  root.add(box(1.1,0.42,2.0,0x4b5563,{x:-6.4,y:0.38,z:4.9}));
+  root.add(box(1.0,0.22,1.0,0x78716c,{x:-7.5,y:0.28,z:5.0}));
 
   // IDLE / break + coffee bar
   const idle=glowZone(9,6.5,0x64748b);idle.position.set(5.5,0,4.5);root.add(idle);
@@ -474,11 +474,7 @@ function buildOffice(){
       color:0xc4a574,emissive:new THREE.Color(zdef.color),emissiveIntensity:0.18,roughness:1,metalness:0,transparent:true,opacity:0.9
     }));
     pad.rotation.x=-Math.PI/2;pad.position.set(zdef.origin[0],0.02,zdef.origin[2]);root.add(pad);
-    // Lettering on the near/south edge of the pad so default camera can read it; desk stays north so bots don't sit on text
-    const lab=floorLabel(zdef.label,zdef.color,{w:Math.min(6.8,zdef.w*1.15),h:1.55,y:0.09});
-    lab.scale.set(0.92,0.92,0.92);
-    lab.position.set(zdef.origin[0], 0.09, zdef.origin[2]+zdef.d*0.38);
-    root.add(lab);
+    // v8: no department floor lettering — colored carpet pads mark zones
     zoneMeshes[zkey]={origin:new THREE.Vector3(zdef.origin[0],0,zdef.origin[2]),w:zdef.w,d:zdef.d};
     root.add(box(1.2,0.32,0.7,0x334155,{x:zdef.origin[0],y:0.35,z:zdef.origin[2]-zdef.d*0.28}));
   }
@@ -486,21 +482,19 @@ function buildOffice(){
   {
     const lx=-3.5,lz=-6.8,lw=5.2,ld=4.2;
     const x0=lx-lw/2,x1=lx+lw/2,z0=lz-ld/2,z1=lz+ld/2;
-    function gMat(){return new THREE.MeshStandardMaterial({color:0xe0f2fe,transparent:true,opacity:0.34,roughness:0.2,metalness:0.2,depthWrite:false,emissive:0xbae6fd,emissiveIntensity:0.2,side:THREE.DoubleSide})}
+    function gMat(){return new THREE.MeshStandardMaterial({color:0xe0f2fe,transparent:true,opacity:0.10,roughness:0.2,metalness:0.2,depthWrite:false,emissive:0xbae6fd,emissiveIntensity:0.1,side:THREE.DoubleSide})}
     function gPanel(w,h,d,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),gMat());m.position.set(x,y,z);m.renderOrder=2;root.add(m)}
     function frm(w,h,d,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color:0xf8fafc,emissive:0x38bdf8,emissiveIntensity:0.4,roughness:0.5}));m.position.set(x,y,z);m.renderOrder=3;root.add(m)}
-    gPanel(lw,2.5,0.05,(x0+x1)/2,1.35,z0); frm(lw+0.1,0.07,0.08,(x0+x1)/2,2.6,z0); frm(lw+0.1,0.07,0.08,(x0+x1)/2,0.15,z0);
-    gPanel(0.05,2.5,ld,x0,1.35,(z0+z1)/2); frm(0.08,0.07,ld+0.1,x0,2.6,(z0+z1)/2);
-    gPanel(lw*0.55,2.5,0.05,x0+lw*0.275,1.35,z1); // partial south (door)
+    gPanel(lw,2.5,0.04,(x0+x1)/2,1.35,z0); frm(lw+0.06,0.04,0.05,(x0+x1)/2,2.6,z0); frm(lw+0.06,0.04,0.05,(x0+x1)/2,0.15,z0);
+    gPanel(0.04,2.5,ld,x0,1.35,(z0+z1)/2); frm(0.05,0.04,ld+0.06,x0,2.6,(z0+z1)/2);
+    gPanel(lw*0.55,2.5,0.04,x0+lw*0.275,1.35,z1); // partial south (door)
     root.add(box(1.6,0.35,0.9,0x1e293b,{x:lx,y:0.4,z:lz-0.6}));
     root.add(box(0.9,0.55,0.06,0x0f172a,{x:lx,y:0.9,z:lz-1.0,emissive:0xe2e8f0,ei:0.5}));
-    const ll=floorLabel('LEAD','#e2e8f0',{w:5.5,h:1.4});ll.scale.set(0.85,0.85,0.85);ll.position.set(lx,0.09,lz+1.35);root.add(ll);
     zoneMeshes.lead={origin:new THREE.Vector3(lx,0,lz),w:lw,d:ld};
   }
   // Research area — animated screens (charts, US map, AI terminal)
   {
     const rx=0.5, rz=8.2;
-    const lab=floorLabel('RESEARCH','#7dd3fc',{w:6.2,h:1.45});lab.scale.set(0.9,0.9,0.9);lab.position.set(rx,0.09,rz-1.6);root.add(lab);
     function mkScreen(px,pz,paint){
       const c=document.createElement('canvas');c.width=256;c.height=160;const ctx=c.getContext('2d');
       const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
@@ -735,6 +729,54 @@ function makeAccessory(kind,col){
     default: m=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1),mat);m.position.set(0.28,0.7,0);
   }
   return m;
+}
+function makeMaxPerson(){
+  // Respectful low-poly adult: 33yo Asian male, warm light–medium skin, short black hair, casual button-up
+  const g=new THREE.Group();
+  const skin=0xd4a574, hair=0x1c1917, shirt=0x5b7c99, pants=0x334155, shoe=0x1e293b;
+  const skinM=new THREE.MeshStandardMaterial({color:skin,roughness:0.9,metalness:0});
+  const shirtM=new THREE.MeshStandardMaterial({color:shirt,roughness:0.88,metalness:0});
+  const pantsM=new THREE.MeshStandardMaterial({color:pants,roughness:0.9,metalness:0});
+  const hairM=new THREE.MeshStandardMaterial({color:hair,roughness:0.95,metalness:0});
+  const shoeM=new THREE.MeshStandardMaterial({color:shoe,roughness:0.85,metalness:0});
+  // Adult proportions (slightly broader than bot avatars)
+  const body=new THREE.Mesh(new THREE.BoxGeometry(0.52,0.58,0.28),shirtM);
+  body.position.y=0.72;g.add(body);
+  const collar=new THREE.Mesh(new THREE.BoxGeometry(0.54,0.07,0.3),new THREE.MeshStandardMaterial({color:0x4a6a85,roughness:0.88,metalness:0}));
+  collar.position.y=1.04;g.add(collar);
+  // placket hint for button-up
+  const placket=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.5,0.02),new THREE.MeshStandardMaterial({color:0x6b8aab,roughness:0.88,metalness:0}));
+  placket.position.set(0,0.72,0.15);g.add(placket);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.22,12,10),skinM);
+  head.scale.set(1.0,1.06,0.96);head.position.y=1.30;g.add(head);
+  // short black hair — neat crop, no caricature
+  const hairCap=new THREE.Mesh(new THREE.SphereGeometry(0.225,12,8,0,Math.PI*2,0,Math.PI*0.58),hairM);
+  hairCap.position.y=1.35;g.add(hairCap);
+  const hairTop=new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.21,0.07,12),hairM);
+  hairTop.position.y=1.46;g.add(hairTop);
+  // subtle eyes (small, evenly spaced — not exaggerated)
+  const eyeM=new THREE.MeshStandardMaterial({color:0x1e293b,roughness:0.55,metalness:0});
+  const eyeL=new THREE.Mesh(new THREE.SphereGeometry(0.025,8,6),eyeM);
+  eyeL.position.set(-0.07,1.31,0.19);g.add(eyeL);
+  const eyeR=eyeL.clone();eyeR.position.x=0.07;g.add(eyeR);
+  const armL=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.38,0.12),shirtM.clone());
+  armL.position.set(-0.34,0.72,0);g.add(armL);
+  const armR=armL.clone();armR.position.x=0.34;g.add(armR);
+  const handL=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.09,0.09),skinM.clone());
+  handL.position.set(-0.34,0.50,0);g.add(handL);
+  const handR=handL.clone();handR.position.x=0.34;g.add(handR);
+  const legL=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.4,0.16),pantsM);
+  legL.position.set(-0.13,0.26,0);g.add(legL);
+  const legR=legL.clone();legR.position.x=0.13;g.add(legR);
+  const shoeL=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.07,0.22),shoeM);
+  shoeL.position.set(-0.13,0.045,0.02);g.add(shoeL);
+  const shoeR=shoeL.clone();shoeR.position.x=0.13;g.add(shoeR);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(0.44,0.045,8,24),new THREE.MeshStandardMaterial({color:0xe8c547,emissive:0xe8c547,emissiveIntensity:1.05,roughness:0.55,metalness:0}));
+  ring.rotation.x=Math.PI/2;ring.position.y=0.04;g.add(ring);
+  g.userData.body=body;g.userData.head=head;g.userData.ring=ring;
+  g.userData.legL=legL;g.userData.legR=legR;g.userData.armL=armL;g.userData.armR=armR;
+  g.userData.shape='human';g.userData.acc=null;
+  return g;
 }
 function makeActor(color,shape='blob',accessory='clipboard'){
   const col=typeof color==='string'?actorHex(color):(color||0x777777);
