@@ -1,0 +1,311 @@
+{
+  "zones": {
+    "lead": {
+      "label": "LEAD",
+      "color": "#e2e8f0",
+      "origin": [
+        -3.5,
+        0,
+        -6.8
+      ],
+      "w": 5.5,
+      "d": 4.5
+    },
+    "ops": {
+      "label": "OPS",
+      "color": "#93c5fd",
+      "origin": [
+        2.5,
+        0,
+        -6.5
+      ],
+      "w": 5.0,
+      "d": 4.2
+    },
+    "hospitality": {
+      "label": "HOSPITALITY",
+      "color": "#67e8f9",
+      "origin": [
+        8.2,
+        0,
+        -5.8
+      ],
+      "w": 5.5,
+      "d": 5.0
+    },
+    "travel": {
+      "label": "TRAVEL",
+      "color": "#93c5fd",
+      "origin": [
+        8.5,
+        0,
+        0.5
+      ],
+      "w": 5.0,
+      "d": 4.0
+    },
+    "health": {
+      "label": "HEALTH",
+      "color": "#fda4af",
+      "origin": [
+        -9.5,
+        0,
+        5.5
+      ],
+      "w": 5.0,
+      "d": 4.0
+    },
+    "jovia": {
+      "label": "JOVIA",
+      "color": "#86efac",
+      "origin": [
+        -3.5,
+        0,
+        5.8
+      ],
+      "w": 6.0,
+      "d": 4.5
+    },
+    "finance": {
+      "label": "FINANCE",
+      "color": "#c4b5fd",
+      "origin": [
+        3.5,
+        0,
+        5.8
+      ],
+      "w": 5.0,
+      "d": 4.0
+    },
+    "productivity": {
+      "label": "PRODUCTIVITY",
+      "color": "#93c5fd",
+      "origin": [
+        9.0,
+        0,
+        5.5
+      ],
+      "w": 5.0,
+      "d": 4.0
+    },
+    "personal": {
+      "label": "PERSONAL",
+      "color": "#a5b4fc",
+      "origin": [
+        -9.0,
+        0,
+        1.5
+      ],
+      "w": 4.5,
+      "d": 3.5
+    },
+    "privacy": {
+      "label": "PRIVACY",
+      "color": "#7dd3fc",
+      "origin": [
+        0.5,
+        0,
+        1.2
+      ],
+      "w": 4.0,
+      "d": 3.2
+    },
+    "dining": {
+      "label": "DINING",
+      "color": "#fdba74",
+      "origin": [
+        5.0,
+        0,
+        1.2
+      ],
+      "w": 4.0,
+      "d": 3.2
+    },
+    "content": {
+      "label": "CONTENT",
+      "color": "#fdba74",
+      "origin": [
+        -9.0,
+        0,
+        -2.0
+      ],
+      "w": 4.5,
+      "d": 3.8
+    },
+    "workers": {
+      "label": "WORKERS",
+      "color": "#cbd5e1",
+      "origin": [
+        8.5,
+        0,
+        -1.8
+      ],
+      "w": 4.5,
+      "d": 3.5
+    },
+    "ventures": {
+      "label": "VENTURES",
+      "color": "#94a3b8",
+      "origin": [
+        2.0,
+        0,
+        -2.2
+      ],
+      "w": 5.5,
+      "d": 3.8
+    }
+  },
+  "byName": {
+    "Grok Bot": {
+      "dept": "Lead",
+      "zone": "lead",
+      "accessory": "crown",
+      "note": "HQ glass corner office"
+    },
+    "Grok Bot Bot": {
+      "dept": "Ops",
+      "zone": "ops",
+      "accessory": "clipboard",
+      "note": "status dashboard"
+    },
+    "Operator": {
+      "dept": "Ops",
+      "zone": "ops",
+      "accessory": "radio",
+      "note": "dispatch"
+    },
+    "1502": {
+      "dept": "Hospitality",
+      "zone": "hospitality",
+      "accessory": "keycard"
+    },
+    "1502 Haskell": {
+      "dept": "Hospitality",
+      "zone": "hospitality",
+      "accessory": "keycard"
+    },
+    "1502 Haskell Upstay": {
+      "dept": "Hospitality",
+      "zone": "hospitality",
+      "accessory": "luggage"
+    },
+    "Bookings": {
+      "dept": "Travel",
+      "zone": "travel",
+      "accessory": "globe"
+    },
+    "Travel": {
+      "dept": "Travel",
+      "zone": "travel",
+      "accessory": "globe"
+    },
+    "Health": {
+      "dept": "Health",
+      "zone": "health",
+      "accessory": "cross"
+    },
+    "Jovia Phil": {
+      "dept": "Jovia",
+      "zone": "jovia",
+      "accessory": "heart"
+    },
+    "Jovia Health MGMT": {
+      "dept": "Jovia",
+      "zone": "jovia",
+      "accessory": "cross"
+    },
+    "Jovia Health Marketing": {
+      "dept": "Jovia",
+      "zone": "jovia",
+      "accessory": "megaphone"
+    },
+    "Jovia Marketing": {
+      "dept": "Jovia",
+      "zone": "jovia",
+      "accessory": "megaphone"
+    },
+    "Wealth": {
+      "dept": "Finance",
+      "zone": "finance",
+      "accessory": "coin"
+    },
+    "Todoist": {
+      "dept": "Productivity",
+      "zone": "productivity",
+      "accessory": "checklist"
+    },
+    "Life Timeline": {
+      "dept": "Personal",
+      "zone": "personal",
+      "accessory": "book"
+    },
+    "Privacy Opt-outs": {
+      "dept": "Privacy",
+      "zone": "privacy",
+      "accessory": "shield"
+    },
+    "Restaurant Finder \u00b7 Dining": {
+      "dept": "Dining",
+      "zone": "dining",
+      "accessory": "fork"
+    },
+    "Faceless Channel": {
+      "dept": "Content",
+      "zone": "content",
+      "accessory": "camera"
+    },
+    "Browser Worker": {
+      "dept": "Workers",
+      "zone": "workers",
+      "accessory": "wrench"
+    },
+    "Errands Worker": {
+      "dept": "Workers",
+      "zone": "workers",
+      "accessory": "bag"
+    },
+    "Affiliate Marketing": {
+      "dept": "Ventures",
+      "zone": "ventures",
+      "accessory": "chart"
+    },
+    "Dropshipping": {
+      "dept": "Ventures",
+      "zone": "ventures",
+      "accessory": "box"
+    },
+    "Crypto Trader": {
+      "dept": "Ventures",
+      "zone": "ventures",
+      "accessory": "coin"
+    },
+    "Digital Product": {
+      "dept": "Ventures",
+      "zone": "ventures",
+      "accessory": "cube"
+    },
+    "Loyalty & Status": {
+      "dept": "Ventures",
+      "zone": "ventures",
+      "accessory": "star"
+    },
+    "Notion": {
+      "dept": "Productivity",
+      "zone": "productivity",
+      "accessory": "book"
+    },
+    "operator": {
+      "dept": "Ops",
+      "zone": "ops",
+      "accessory": "radio"
+    }
+  },
+  "rooms": {
+    "needs": "Needs Max glass office (front)",
+    "lead": "Lead glass corner (Grok Bot)",
+    "desk": "Department desk (working)",
+    "lounge": "Lounge (waiting/handoff)",
+    "idle": "Break room (idle)",
+    "research": "Research area"
+  }
+}
