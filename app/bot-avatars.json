@@ -1,0 +1,459 @@
+{
+  "generatedFrom": "/home/box/agent-data/agents/*/profile.json",
+  "paletteSource": "Grok Bot 0.70.2 / 0.75.8 character palette (baseHex)",
+  "palette": {
+    "black": "#000000",
+    "brown": "#936439",
+    "red": "#FF263C",
+    "orange": "#FF6700",
+    "yellow": "#FF9800",
+    "green": "#00C972",
+    "cyan": "#00BCA6",
+    "blue": "#1084FE",
+    "violet": "#9159FE",
+    "magenta": "#FF309B",
+    "gray": "#777777"
+  },
+  "paletteDetail": {
+    "black": {
+      "hex": "#000000",
+      "light": "#000000",
+      "dark": "#FFFFFF"
+    },
+    "brown": {
+      "hex": "#936439",
+      "light": "#A27952",
+      "dark": "#855C36"
+    },
+    "red": {
+      "hex": "#FF263C",
+      "light": "#FF3E51",
+      "dark": "#E02135"
+    },
+    "orange": {
+      "hex": "#FF6700",
+      "light": "#FF781C",
+      "dark": "#FF6700"
+    },
+    "yellow": {
+      "hex": "#FF9800",
+      "light": "#FFAF38",
+      "dark": "#FF9800"
+    },
+    "green": {
+      "hex": "#00C972",
+      "light": "#00C972",
+      "dark": "#009957"
+    },
+    "cyan": {
+      "hex": "#00BCA6",
+      "light": "#1CC3B0",
+      "dark": "#00A592"
+    },
+    "blue": {
+      "hex": "#1084FE",
+      "light": "#2A92FE",
+      "dark": "#0E74E0"
+    },
+    "violet": {
+      "hex": "#9159FE",
+      "light": "#A97EFE",
+      "dark": "#804EE0"
+    },
+    "magenta": {
+      "hex": "#FF309B",
+      "light": "#FF5EB1",
+      "dark": "#E02A88"
+    },
+    "gray": {
+      "hex": "#777777",
+      "light": "#959595",
+      "dark": "#777777"
+    }
+  },
+  "neutral": "#777777",
+  "byName": {
+    "Errands Worker": {
+      "id": "096ca851-fb23-47c5-9817-d426569b2d59",
+      "colorName": "gray",
+      "hex": "#777777",
+      "shape": "pebble",
+      "source": "avatarColor"
+    },
+    "Loyalty & Status": {
+      "id": "0a1454ae-dfa6-446f-85c7-1ee602bfb9b5",
+      "colorName": null,
+      "hex": "#777777",
+      "shape": null,
+      "source": "neutral"
+    },
+    "1502": {
+      "id": "13fb674f-e80e-4145-b9b9-d92ef92d09cf",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "pebble",
+      "source": "avatarColor"
+    },
+    "Dropshipping": {
+      "id": "2521d6fb-89c2-43a6-ae77-5854b37dce4b",
+      "colorName": null,
+      "hex": "#777777",
+      "shape": null,
+      "source": "neutral"
+    },
+    "Jovia Phil": {
+      "id": "43e42232-ca49-4a20-9ff3-3901e743087a",
+      "colorName": "green",
+      "hex": "#00C972",
+      "shape": "heart",
+      "source": "avatarColor"
+    },
+    "Digital Product": {
+      "id": "5b24eabd-1baf-40f2-bada-1526b9375e14",
+      "colorName": null,
+      "hex": "#777777",
+      "shape": null,
+      "source": "neutral"
+    },
+    "Grok Bot Bot": {
+      "id": "5c76b4bc-cba1-4c2b-aaa6-b5a76bdd59a3",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "blob",
+      "source": "avatarColor"
+    },
+    "Jovia Health MGMT": {
+      "id": "6398869e-b8cc-41e6-b272-f6aaaefb485c",
+      "colorName": "green",
+      "hex": "#00C972",
+      "shape": "shield",
+      "source": "avatarColor"
+    },
+    "Bookings": {
+      "id": "6b2f763b-18ea-4aee-8d23-0d8be54fcaeb",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "Health": {
+      "id": "6c999119-6f75-4f59-a7f9-7d401548b8fb",
+      "colorName": "red",
+      "hex": "#FF263C",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "Jovia Marketing": {
+      "id": "6e4b5f0c-57a9-4522-8d79-1ba78f076ef7",
+      "colorName": "green",
+      "hex": "#00C972",
+      "shape": "hex",
+      "source": "avatarColor"
+    },
+    "1502 Haskell": {
+      "id": "7e1e5696-ac0a-4007-bf3c-c0a2c1c02c0a",
+      "colorName": "cyan",
+      "hex": "#00BCA6",
+      "shape": "tablet",
+      "source": "avatarColor"
+    },
+    "Affiliate Marketing": {
+      "id": "8d304ba9-9abb-453e-b75c-ecf3f3efd5cb",
+      "colorName": null,
+      "hex": "#777777",
+      "shape": null,
+      "source": "neutral"
+    },
+    "1502 Haskell Upstay": {
+      "id": "8d95711f-81f2-4000-8b78-c1fc68cdb6b7",
+      "colorName": "cyan",
+      "hex": "#00BCA6",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "Faceless Channel": {
+      "id": "90495400-ce50-48eb-a839-f2eb0811ce78",
+      "colorName": "orange",
+      "hex": "#FF6700",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "Browser Worker": {
+      "id": "91af2943-151e-4a0e-b3f4-a8ef1a40c680",
+      "colorName": "gray",
+      "hex": "#777777",
+      "shape": "pebble",
+      "source": "avatarColor"
+    },
+    "Grok Bot": {
+      "id": "b5449c50-3757-4e00-803e-6a440264108f",
+      "colorName": "black",
+      "hex": "#000000",
+      "shape": "blob",
+      "source": "avatarColor"
+    },
+    "Crypto Trader": {
+      "id": "cabd44ac-d33c-4f08-bd8f-23ced84cf58b",
+      "colorName": null,
+      "hex": "#777777",
+      "shape": null,
+      "source": "neutral"
+    },
+    "Todoist": {
+      "id": "cbd139d8-45b1-4639-9555-d749d79d5d33",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "shield",
+      "source": "avatarColor"
+    },
+    "Privacy Opt-outs": {
+      "id": "d1698bbb-879a-4ef0-9930-eb39ac6ac728",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "Notion": {
+      "id": "d810c3e4-a938-4b72-8ed7-2c7d91208f74",
+      "colorName": null,
+      "hex": "#3890e0",
+      "shape": null,
+      "source": "asset-dominant"
+    },
+    "Life Timeline": {
+      "id": "dcf1bffb-7b65-4c7b-ae91-fed432b1307f",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "Operator": {
+      "id": "e7968efc-1289-4fe8-a578-125a7fcecf44",
+      "colorName": "black",
+      "hex": "#000000",
+      "shape": "star",
+      "source": "avatarColor"
+    },
+    "Wealth": {
+      "id": "ebbfcb18-21a5-4bc3-a845-301df745d084",
+      "colorName": "violet",
+      "hex": "#9159FE",
+      "shape": "blob",
+      "source": "avatarColor"
+    },
+    "Jovia Health Marketing": {
+      "id": "eeeecd8d-a606-4b71-bb16-1e361390ab39",
+      "colorName": "green",
+      "hex": "#00C972",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "Restaurant Finder \u00b7 Dining": {
+      "id": "f86005ee-6b2e-4ce1-b0c7-841b06000753",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "Travel": {
+      "id": "6b2f763b-18ea-4aee-8d23-0d8be54fcaeb",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "squircle",
+      "source": "avatarColor",
+      "aliasOf": "Bookings"
+    },
+    "operator": {
+      "id": "e7968efc-1289-4fe8-a578-125a7fcecf44",
+      "colorName": "black",
+      "hex": "#000000",
+      "shape": "star",
+      "source": "avatarColor",
+      "aliasOf": "Operator"
+    }
+  },
+  "byId": {
+    "096ca851-fb23-47c5-9817-d426569b2d59": {
+      "name": "Errands Worker",
+      "colorName": "gray",
+      "hex": "#777777",
+      "shape": "pebble",
+      "source": "avatarColor"
+    },
+    "0a1454ae-dfa6-446f-85c7-1ee602bfb9b5": {
+      "name": "Loyalty & Status",
+      "colorName": null,
+      "hex": "#777777",
+      "shape": null,
+      "source": "neutral"
+    },
+    "13fb674f-e80e-4145-b9b9-d92ef92d09cf": {
+      "name": "1502",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "pebble",
+      "source": "avatarColor"
+    },
+    "2521d6fb-89c2-43a6-ae77-5854b37dce4b": {
+      "name": "Dropshipping",
+      "colorName": null,
+      "hex": "#777777",
+      "shape": null,
+      "source": "neutral"
+    },
+    "43e42232-ca49-4a20-9ff3-3901e743087a": {
+      "name": "Jovia Phil",
+      "colorName": "green",
+      "hex": "#00C972",
+      "shape": "heart",
+      "source": "avatarColor"
+    },
+    "5b24eabd-1baf-40f2-bada-1526b9375e14": {
+      "name": "Digital Product",
+      "colorName": null,
+      "hex": "#777777",
+      "shape": null,
+      "source": "neutral"
+    },
+    "5c76b4bc-cba1-4c2b-aaa6-b5a76bdd59a3": {
+      "name": "Grok Bot Bot",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "blob",
+      "source": "avatarColor"
+    },
+    "6398869e-b8cc-41e6-b272-f6aaaefb485c": {
+      "name": "Jovia Health MGMT",
+      "colorName": "green",
+      "hex": "#00C972",
+      "shape": "shield",
+      "source": "avatarColor"
+    },
+    "6b2f763b-18ea-4aee-8d23-0d8be54fcaeb": {
+      "name": "Bookings",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "6c999119-6f75-4f59-a7f9-7d401548b8fb": {
+      "name": "Health",
+      "colorName": "red",
+      "hex": "#FF263C",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "6e4b5f0c-57a9-4522-8d79-1ba78f076ef7": {
+      "name": "Jovia Marketing",
+      "colorName": "green",
+      "hex": "#00C972",
+      "shape": "hex",
+      "source": "avatarColor"
+    },
+    "7e1e5696-ac0a-4007-bf3c-c0a2c1c02c0a": {
+      "name": "1502 Haskell",
+      "colorName": "cyan",
+      "hex": "#00BCA6",
+      "shape": "tablet",
+      "source": "avatarColor"
+    },
+    "8d304ba9-9abb-453e-b75c-ecf3f3efd5cb": {
+      "name": "Affiliate Marketing",
+      "colorName": null,
+      "hex": "#777777",
+      "shape": null,
+      "source": "neutral"
+    },
+    "8d95711f-81f2-4000-8b78-c1fc68cdb6b7": {
+      "name": "1502 Haskell Upstay",
+      "colorName": "cyan",
+      "hex": "#00BCA6",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "90495400-ce50-48eb-a839-f2eb0811ce78": {
+      "name": "Faceless Channel",
+      "colorName": "orange",
+      "hex": "#FF6700",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "91af2943-151e-4a0e-b3f4-a8ef1a40c680": {
+      "name": "Browser Worker",
+      "colorName": "gray",
+      "hex": "#777777",
+      "shape": "pebble",
+      "source": "avatarColor"
+    },
+    "b5449c50-3757-4e00-803e-6a440264108f": {
+      "name": "Grok Bot",
+      "colorName": "black",
+      "hex": "#000000",
+      "shape": "blob",
+      "source": "avatarColor"
+    },
+    "cabd44ac-d33c-4f08-bd8f-23ced84cf58b": {
+      "name": "Crypto Trader",
+      "colorName": null,
+      "hex": "#777777",
+      "shape": null,
+      "source": "neutral"
+    },
+    "cbd139d8-45b1-4639-9555-d749d79d5d33": {
+      "name": "Todoist",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "shield",
+      "source": "avatarColor"
+    },
+    "d1698bbb-879a-4ef0-9930-eb39ac6ac728": {
+      "name": "Privacy Opt-outs",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "d810c3e4-a938-4b72-8ed7-2c7d91208f74": {
+      "name": "Notion",
+      "colorName": null,
+      "hex": "#3890e0",
+      "shape": null,
+      "source": "asset-dominant"
+    },
+    "dcf1bffb-7b65-4c7b-ae91-fed432b1307f": {
+      "name": "Life Timeline",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "e7968efc-1289-4fe8-a578-125a7fcecf44": {
+      "name": "Operator",
+      "colorName": "black",
+      "hex": "#000000",
+      "shape": "star",
+      "source": "avatarColor"
+    },
+    "ebbfcb18-21a5-4bc3-a845-301df745d084": {
+      "name": "Wealth",
+      "colorName": "violet",
+      "hex": "#9159FE",
+      "shape": "blob",
+      "source": "avatarColor"
+    },
+    "eeeecd8d-a606-4b71-bb16-1e361390ab39": {
+      "name": "Jovia Health Marketing",
+      "colorName": "green",
+      "hex": "#00C972",
+      "shape": "squircle",
+      "source": "avatarColor"
+    },
+    "f86005ee-6b2e-4ce1-b0c7-841b06000753": {
+      "name": "Restaurant Finder \u00b7 Dining",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "squircle",
+      "source": "avatarColor"
+    }
+  }
+}
