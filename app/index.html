@@ -242,9 +242,9 @@ let zoneMeshes={};
 const isMobile=()=>matchMedia('(max-width:768px)').matches||navigator.maxTouchPoints>1;
 
 function makeLabel(text,color='#94a3b8',scale=1,opts={}){
-  // Text ~30% larger than v3; plate tight around glyphs (no huge overlapping slabs)
-  const fontSize=Math.round(28*1.30);
-  const padX=14, padY=7, maxText=380;
+  // Bigger than v3 (~45%), plate tight to glyphs — overlap handled by stacking, not hiding
+  const fontSize=Math.round(28*1.45);
+  const padX=12, padY=6, maxText=440;
   const probe=document.createElement('canvas').getContext('2d');
   probe.font=`bold ${fontSize}px system-ui,sans-serif`;
   let t=String(text||'');
@@ -255,37 +255,38 @@ function makeLabel(text,color='#94a3b8',scale=1,opts={}){
   const tw=Math.ceil(probe.measureText(t).width);
   const boxW=tw+padX*2, boxH=fontSize+padY*2;
   const c=document.createElement('canvas');
-  c.width=Math.min(512, Math.max(48, boxW+4));
-  c.height=Math.min(96, Math.max(28, boxH+4));
+  c.width=Math.min(560, Math.max(48, boxW+4));
+  c.height=Math.min(104, Math.max(28, boxH+4));
   const g=c.getContext('2d');
   g.clearRect(0,0,c.width,c.height);
   g.font=`bold ${fontSize}px system-ui,sans-serif`;
   const bx=(c.width-boxW)/2, by=(c.height-boxH)/2;
-  g.fillStyle='rgba(0,0,0,0.45)';
-  g.beginPath();g.roundRect(bx,by,boxW,boxH,9);g.fill();
+  g.fillStyle='rgba(0,0,0,0.48)';
+  g.beginPath();g.roundRect(bx,by,boxW,boxH,8);g.fill();
   g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';
   g.fillText(t,c.width/2,c.height/2+0.5);
   const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
-  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false,opacity:opts.full?0.95:0.8}));
-  // Keep text readable (~30% up) but world plate stays snug — cap width so long names don't slab
-  const worldH=0.40*scale;
-  const aspect=c.width/c.height;
-  const worldW=Math.min(2.15, worldH*aspect);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false,opacity:opts.full?0.96:0.88}));
+  const worldH=0.58*scale;
+  const aspect=c.width/Math.max(1,c.height);
+  const worldW=Math.min(2.55, worldH*aspect);
   sp.scale.set(worldW, worldH, 1);
   sp.center.set(0.5,0);
   return sp;
 }
-function floorLabel(text,color){
+function floorLabel(text,color,opts={}){
+  // High-contrast carpet lettering — readable from default camera without covering bots
   const c=document.createElement('canvas');c.width=1024;c.height=256;const g=c.getContext('2d');
   g.clearRect(0,0,1024,256);
-  g.fillStyle='rgba(0,0,0,0.55)';g.beginPath();g.roundRect(40,60,944,136,24);g.fill();
-  g.strokeStyle=color;g.lineWidth=8;g.stroke();
-  g.fillStyle=color;g.font='bold 96px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';
-  g.fillText(text,512,128);
+  const solid=opts.solid!==false;
+  if(solid){g.fillStyle='rgba(15,23,42,0.72)';g.beginPath();g.roundRect(24,48,976,160,20);g.fill()}
+  g.strokeStyle=color;g.lineWidth=solid?10:6;g.beginPath();g.roundRect(24,48,976,160,20);g.stroke();
+  g.fillStyle=color;g.font='bold 110px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';
+  g.shadowColor='rgba(0,0,0,0.55)';g.shadowBlur=8;g.fillText(text,512,128);g.shadowBlur=0;
   const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
-  const mat=new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:0.95,depthWrite:false});
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(8.2,2.05),mat);
-  m.rotation.x=-Math.PI/2;m.position.y=0.06;return m;
+  const mat=new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:opts.opacity??0.98,depthWrite:false});
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(opts.w??7.2, opts.h??1.8),mat);
+  m.rotation.x=-Math.PI/2;m.position.y=opts.y??0.08;m.renderOrder=1;return m;
 }
 function glowZone(w,d,color){
   const g=new THREE.Group();
@@ -446,15 +447,16 @@ function buildOffice(){
   root.userData.racks=[];
   for(const [zkey,zdef] of Object.entries(BOT_DEPTS.zones)){
     const pad=new THREE.Mesh(new THREE.PlaneGeometry(zdef.w,zdef.d),new THREE.MeshStandardMaterial({
-      color:0xc4a574,emissive:new THREE.Color(zdef.color),emissiveIntensity:0.12,roughness:1,metalness:0,transparent:true,opacity:0.92
+      color:0xc4a574,emissive:new THREE.Color(zdef.color),emissiveIntensity:0.18,roughness:1,metalness:0,transparent:true,opacity:0.9
     }));
     pad.rotation.x=-Math.PI/2;pad.position.set(zdef.origin[0],0.02,zdef.origin[2]);root.add(pad);
-    const lab=floorLabel(zdef.label,zdef.color);
-    lab.scale.set(0.55,0.55,0.55);
-    lab.position.set(zdef.origin[0],0.04,zdef.origin[2]+zdef.d*0.35);root.add(lab);
+    // Lettering on the near/south edge of the pad so default camera can read it; desk stays north so bots don't sit on text
+    const lab=floorLabel(zdef.label,zdef.color,{w:Math.min(6.8,zdef.w*1.15),h:1.55,y:0.09});
+    lab.scale.set(0.92,0.92,0.92);
+    lab.position.set(zdef.origin[0], 0.09, zdef.origin[2]+zdef.d*0.38);
+    root.add(lab);
     zoneMeshes[zkey]={origin:new THREE.Vector3(zdef.origin[0],0,zdef.origin[2]),w:zdef.w,d:zdef.d};
-    // small desk in each dept
-    root.add(box(1.2,0.32,0.7,0x334155,{x:zdef.origin[0],y:0.35,z:zdef.origin[2]-0.4}));
+    root.add(box(1.2,0.32,0.7,0x334155,{x:zdef.origin[0],y:0.35,z:zdef.origin[2]-zdef.d*0.28}));
   }
   // Lead glass corner office (Grok Bot) — next to Needs Max, also never cut away
   {
@@ -468,13 +470,13 @@ function buildOffice(){
     gPanel(lw*0.55,2.5,0.05,x0+lw*0.275,1.35,z1); // partial south (door)
     root.add(box(1.6,0.35,0.9,0x1e293b,{x:lx,y:0.4,z:lz-0.6}));
     root.add(box(0.9,0.55,0.06,0x0f172a,{x:lx,y:0.9,z:lz-1.0,emissive:0xe2e8f0,ei:0.5}));
-    const ll=floorLabel('LEAD','#e2e8f0');ll.scale.set(0.5,0.5,0.5);ll.position.set(lx,0.05,lz+1.2);root.add(ll);
+    const ll=floorLabel('LEAD','#e2e8f0',{w:5.5,h:1.4});ll.scale.set(0.85,0.85,0.85);ll.position.set(lx,0.09,lz+1.35);root.add(ll);
     zoneMeshes.lead={origin:new THREE.Vector3(lx,0,lz),w:lw,d:ld};
   }
   // Research area — animated screens (charts, US map, AI terminal)
   {
     const rx=0.5, rz=8.2;
-    const lab=floorLabel('RESEARCH','#7dd3fc');lab.scale.set(0.55,0.55,0.55);lab.position.set(rx,0.05,rz-1.8);root.add(lab);
+    const lab=floorLabel('RESEARCH','#7dd3fc',{w:6.2,h:1.45});lab.scale.set(0.9,0.9,0.9);lab.position.set(rx,0.09,rz-1.6);root.add(lab);
     function mkScreen(px,pz,paint){
       const c=document.createElement('canvas');c.width=256;c.height=160;const ctx=c.getContext('2d');
       const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
@@ -781,17 +783,13 @@ function applyBots(instant){
       const op=b.stale?0.35:1;
       a.group.userData.body.material.opacity=op;a.group.userData.body.material.transparent=b.stale;
       a.group.userData.head.material.opacity=op;a.group.userData.head.material.transparent=b.stale;
-      // refresh label — tight plate; stagger when crowded; far ones hidden in updateLabelVisibility
+      // refresh label — every bot name visible; stacking/leaders in updateLabelVisibility
       const old=a.group.userData.label;a.group.remove(old);if(old.material.map)old.material.map.dispose();old.material.dispose();
-      const crowded=list.length>5;
+      if(a.group.userData.leader){a.group.remove(a.group.userData.leader);a.group.userData.leader.geometry?.dispose?.();a.group.userData.leader=null}
       const showFull=(hoveredBot===b.bot||selectedBot===b.bot||a.summoned);
-      const tag=showFull?b.bot:(b.bot.length>12?b.bot.slice(0,11)+'…':b.bot);
-      // Suffix only when focused — cuts plate width in crowds
-      const suffix=showFull?((b.stale?' · stale':'')+(b.workStale?' · work stale':'')):'';
-      const label=makeLabel(tag+suffix, '#94a3b8', crowded?0.85:1, {full:showFull});
-      const staggerX=crowded?((i%5)-2)*0.28:0;
-      const staggerY=1.58+(crowded?(i%4)*0.34:0);
-      label.position.set(staggerX, staggerY, 0);
+      const suffix=(b.stale?' · stale':'')+(b.workStale?' · work stale':'');
+      const label=makeLabel(b.bot+suffix, '#94a3b8', 1, {full:showFull||true});
+      label.position.set(0, 1.68, 0);
       a.group.add(label);a.group.userData.label=label;a.labelPri=i;
     });
   }
@@ -906,29 +904,63 @@ function updateCutaway(){
     if(w.sky && mat.emissiveIntensity!=null){/* no-op */}
   }
 }
+function ensureLabelLeader(a, toX, toY){
+  let line=a.group.userData.leader;
+  const fromY=1.32;
+  if(!line){
+    const geo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,fromY,0), new THREE.Vector3(toX,toY,0)]);
+    line=new THREE.Line(geo, new THREE.LineBasicMaterial({color:0xcbd5e1, transparent:true, opacity:0.4, depthTest:false}));
+    line.renderOrder=4;
+    a.group.add(line);
+    a.group.userData.leader=line;
+  }else{
+    const arr=line.geometry.attributes.position.array;
+    arr[0]=0;arr[1]=fromY;arr[2]=0;arr[3]=toX;arr[4]=toY;arr[5]=0;
+    line.geometry.attributes.position.needsUpdate=true;
+  }
+  line.visible=toY>1.9 || Math.abs(toX)>0.08;
+  return line;
+}
+function layoutLabelGroup(group){
+  group.sort((p,q)=>(p.x-q.x)||(p.z-q.z)||p.name.localeCompare(q.name));
+  group.forEach((row,i)=>{
+    const inNeeds=row.room==='needs';
+    if(!inNeeds && !row.force && row.dist>48){
+      row.lab.visible=false;
+      if(row.a.group.userData.leader)row.a.group.userData.leader.visible=false;
+      return;
+    }
+    row.lab.visible=true;
+    row.lab.material.opacity=row.force?0.96:0.88;
+    const step=inNeeds?0.55:0.48;
+    const stackY=1.68 + i*step;
+    const stackX=(i===0)?0: ((i%2)?1:-1)*0.28*Math.ceil(i/2);
+    row.lab.position.set(stackX, stackY, 0);
+    ensureLabelLeader(row.a, stackX, stackY);
+  });
+}
 function updateLabelVisibility(){
+  // Show ALL names. Overlap → vertical stacks + offset leaders (never hide Needs Max).
   if(!camera)return;
-  const cam=camera.position;
   const rows=[];
   for(const a of actors.values()){
     const lab=a.group.userData.label;if(!lab)continue;
     const name=a.group.userData.bot;
     const force=name===hoveredBot||name===selectedBot||a.summoned;
-    const dx=a.group.position.x-cam.x,dy=a.group.position.y-cam.y,dz=a.group.position.z-cam.z;
-    const dist=Math.hypot(dx,dy,dz);
-    rows.push({lab,force,dist});
+    const dist=camera.position.distanceTo(a.group.position);
+    rows.push({a,lab,name,force,dist,room:a.room,x:a.group.position.x,z:a.group.position.z});
   }
-  rows.sort((p,q)=>p.dist-q.dist);
-  // Prefer nearer tags; hide the rest until hover/tap — stops plate piles in Needs Max
-  const nearBudget=isMobile()?6:9;
-  let shown=0;
-  for(const row of rows){
-    if(row.force){row.lab.visible=true;row.lab.material.opacity=0.95;shown++;continue;}
-    if(row.dist>18||shown>=nearBudget){row.lab.visible=false;continue;}
-    row.lab.visible=true;
-    row.lab.material.opacity=row.dist>14?0.45:0.82;
-    shown++;
+  // Needs Max: one shared stack so the meeting-room cluster doesn't pile plates
+  const needs=rows.filter(r=>r.room==='needs');
+  const rest=rows.filter(r=>r.room!=='needs');
+  layoutLabelGroup(needs);
+  const cells=new Map();
+  for(const row of rest){
+    const key=(Math.round(row.x/1.6))+'_'+(Math.round(row.z/1.6));
+    if(!cells.has(key))cells.set(key,[]);
+    cells.get(key).push(row);
   }
+  for(const group of cells.values())layoutLabelGroup(group);
 }
 function animateActors(dt,t){
   // research screen animations
@@ -1023,7 +1055,7 @@ document.querySelectorAll('.tod button').forEach(b=>b.onclick=()=>setTod(b.datas
 
 window.__summonBot=(name)=>{summonToMax(name);selectedBot=name;renderPanel(name)};
 window.__dismissSummon=()=>dismissSummon();
-window.__officeProbe=()=>{const a=summonedBot&&actors.get(summonedBot);const dist=a&&a.target?Math.hypot(a.target.x-a.group.position.x,a.target.z-a.group.position.z):null;return{actorCount:actors.size,names:[...actors.keys()],maxOk:!!maxPerson&&!!maxDeskFront,summoned:summonedBot,wiggling:!!(a&&a.wiggleUntil&&performance.now()<a.wiggleUntil),dist,desk:maxDeskFront?{x:maxDeskFront.x,z:maxDeskFront.z}:null,botIdSample:botId('Grok Bot Bot'),panelLink:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('href')||null,needsCount:summarizeBots().filter(b=>b.room==='needs').length};};
+window.__officeProbe=()=>{const a=summonedBot&&actors.get(summonedBot);const dist=a&&a.target?Math.hypot(a.target.x-a.group.position.x,a.target.z-a.group.position.z):null;let labelsTotal=0,labelsVisible=0;for(const act of actors.values()){const lab=act.group.userData.label;if(!lab)continue;labelsTotal++;if(lab.visible)labelsVisible++}return{actorCount:actors.size,names:[...actors.keys()],maxOk:!!maxPerson&&!!maxDeskFront,summoned:summonedBot,wiggling:!!(a&&a.wiggleUntil&&performance.now()<a.wiggleUntil),dist,desk:maxDeskFront?{x:maxDeskFront.x,z:maxDeskFront.z}:null,botIdSample:botId('Grok Bot Bot'),panelLink:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('href')||null,needsCount:summarizeBots().filter(b=>b.room==='needs').length,labelsTotal,labelsVisible};};
 window.__aimMaxDesk=()=>{if(!controls||!maxDeskFront)return;controls.target.set(maxDeskFront.x,0.55,maxDeskFront.z);camera.position.set(maxDeskFront.x-7.5,8.5,maxDeskFront.z-9.5);controls.update()};
 window.__resetCam=()=>{if(!controls||!camera)return;camera.position.set(-19,11.5,-17);controls.target.set(-4.5,0.35,-2.2);controls.update()};
 window.__closePanel=()=>{dismissSummon();selectedBot=null;const panel=document.querySelector('#officePanel');if(panel){panel.classList.remove('open');panel.innerHTML=''}};
