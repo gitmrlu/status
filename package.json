@@ -1,0 +1,19 @@
+{
+  "name": "gitmrlu-status",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Bot Status Office — Supabase-backed 3D office + private planners",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/build.mjs",
+    "preview": "vite preview",
+    "check:privacy": "node scripts/check-privacy.mjs"
+  },
+  "devDependencies": {
+    "vite": "^5.4.11"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

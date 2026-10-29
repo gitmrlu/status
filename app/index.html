@@ -45,6 +45,15 @@ button.ok{background:#22c55e;color:#fff;border-color:#22c55e}
   #officePanel{width:100%;border-left:0;border-top:1px solid var(--bd);max-height:42vh}
   header h1{font-size:14px}
 }
+
+.view-nav{display:flex;gap:4px;align-items:center;margin-left:4px}
+.view-nav button{padding:5px 12px;border-radius:99px;font-size:12px;background:transparent}
+.view-nav button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+#plannerWrap{flex:1;min-height:0;display:none;flex-direction:column;background:var(--bg)}
+#plannerWrap.on{display:flex}
+#plannerFrame{flex:1;width:100%;border:0;background:#fff}
+#plannerStatus{padding:8px 14px;font-size:12px;color:var(--mut);border-bottom:1px solid var(--bd)}
+#plannerStatus.err{color:#ef4444}
 </style></head><body>
 <div id="login" class="hide"><h1>Bot Status · Office</h1><div id="msg">Sign in with your email. We'll email you a sign-in link.</div>
 <input id="em" type="email" value="mail.maxlu@gmail.com" autocomplete="email"><button class="p" id="send">Send sign-in link</button>
@@ -52,6 +61,11 @@ button.ok{background:#22c55e;color:#fff;border-color:#22c55e}
 <div id="app" class="hide">
 <header>
   <h1>Bot Status · Office</h1><span id="live" title="live updates"></span>
+  <nav class="view-nav" id="viewNav" aria-label="Views">
+    <button type="button" data-view="office" class="on">Office</button>
+    <button type="button" data-view="haskell-exit-plan">Haskell Exit</button>
+    <button type="button" data-view="jovia-golive-planner">Jovia Go-Live</button>
+  </nav>
   <div class="stats" id="stats"></div>
   <span id="err"></span>
   <span style="flex:1"></span>
@@ -83,6 +97,10 @@ button.ok{background:#22c55e;color:#fff;border-color:#22c55e}
     </div>
   </div>
   <aside id="officePanel"></aside>
+</div>
+<div id="plannerWrap">
+  <div id="plannerStatus">Loading planner…</div>
+  <iframe id="plannerFrame" title="Planner" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
 </div>
 </div>
 <script type="importmap">
@@ -1151,5 +1169,74 @@ $('#officePanel').addEventListener('click',async e=>{
   // Local mirror so Needs Max room updates immediately (status row unchanged)
   const cur=items.get(id);if(cur){cur.note=note;cur.next=nextExtra;cur.updated_at=new Date().toISOString();items.set(id,cur)}
   applyBots(false);if(selectedBot)renderPanel(selectedBot);
+});
+
+
+/* ===== Planners (private_docs via Supabase; never shipped in public Pages) ===== */
+const PLANNER_IDS={
+  'haskell-exit-plan':'Haskell Exit Plan',
+  'jovia-golive-planner':'Jovia Go-Live'
+};
+let currentView='office';
+const plannerCache=new Map(); // id -> html
+
+function setView(view){
+  currentView=view;
+  document.querySelectorAll('#viewNav [data-view]').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
+  const office=$('#officeWrap'), plan=$('#plannerWrap');
+  if(view==='office'){
+    plan.classList.remove('on');
+    office.style.display='';
+    // clear iframe to stop timers when leaving
+    const f=$('#plannerFrame'); if(f) f.removeAttribute('srcdoc');
+    try{ resizeOffice(); }catch(e){}
+    return;
+  }
+  office.style.display='none';
+  plan.classList.add('on');
+  loadPlanner(view);
+}
+
+async function loadPlanner(id){
+  const st=$('#plannerStatus'), frame=$('#plannerFrame');
+  st.classList.remove('err');
+  st.textContent='Loading '+ (PLANNER_IDS[id]||id) +'…';
+  frame.removeAttribute('srcdoc');
+  try{
+    let html=plannerCache.get(id);
+    if(!html){
+      const{data,error}=await sb.from('private_docs').select('html,title,updated_at').eq('id',id).maybeSingle();
+      if(error) throw error;
+      if(!data||!data.html) throw new Error('Planner not found (signed in as Max?)');
+      html=data.html;
+      plannerCache.set(id,html);
+      st.textContent=(data.title||PLANNER_IDS[id]||id)+' · updated '+(data.updated_at||'').slice(0,19).replace('T',' ')+' UTC';
+    } else {
+      st.textContent=(PLANNER_IDS[id]||id)+' · cached this session';
+    }
+    // srcdoc + sandbox: same-origin so planner localStorage (haskell-*, jovia*) persists
+    frame.srcdoc=html;
+  }catch(e){
+    st.classList.add('err');
+    st.textContent='Failed to load planner: '+(e.message||e);
+  }
+}
+
+$('#viewNav').addEventListener('click',e=>{
+  const b=e.target.closest('[data-view]'); if(!b) return;
+  setView(b.dataset.view);
+});
+
+// Extra listener: wipe planner cache on sign-out
+sb.auth.onAuthStateChange((_e,s)=>{
+  if(!s){
+    plannerCache.clear();
+    const f=$('#plannerFrame'); if(f) f.removeAttribute('srcdoc');
+    currentView='office';
+    document.querySelectorAll('#viewNav [data-view]').forEach(b=>b.classList.toggle('on',b.dataset.view==='office'));
+    const office=$('#officeWrap'), plan=$('#plannerWrap');
+    if(office) office.style.display='';
+    if(plan) plan.classList.remove('on');
+  }
 });
 </script></body></html>
