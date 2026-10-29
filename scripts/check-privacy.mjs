@@ -10,13 +10,13 @@ const roots = process.argv.slice(2);
 const targets = roots.length ? roots : ['.'];
 // base64 of distinctive planner markers (decoded only in memory at check time)
 const DENY_B64 = [
-  'X19IQVNRRUxMX1NFRURfXw==',           // __HASKELL_SEED__
-  'X19KT1ZJQV9TRUVEX18=',               // __JOVIA_SEED__
-  'c3RhdHVzLWFwcC1wbGFubmVy',           // status-app-planner
-  'Y29tbW9uX19lbmdhZ2U=',               // common__engage
-  'a2xnYWRtaW5Aa2VsbHlsZWdhbGdyb3VwLmNvbQ==', // klgadmin@...
-  'S2VsbHkgTGVnYWwgaW52b2ljZSAxNDU4NQ==', // Kelly Legal invoice 14585
-  'Zm9yZWNsb3N1cmVOb3Rl',               // foreclosureNote
+  'X19IQVNRRUxMX1NFRURfXw==',
+  'X19KT1ZJQV9TRUVEX18=',
+  'c3RhdHVzLWFwcC1wbGFubmVy',
+  'Y29tbW9uX19lbmdhZ2U=',
+  'a2xnYWRtaW5Aa2VsbHlsZWdhbGdyb3VwLmNvbQ==',
+  'S2VsbHkgTGVnYWwgaW52b2ljZSAxNDU4NQ==',
+  'Zm9yZWNsb3N1cmVOb3Rl',
 ];
 const DENY = DENY_B64.map((b) => Buffer.from(b, 'base64').toString('utf8'));
 const SKIP_DIR = new Set(['.git', 'node_modules', 'dist', '.vite']);
