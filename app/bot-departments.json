@@ -194,11 +194,6 @@
       "zone": "travel",
       "accessory": "globe"
     },
-    "Travel": {
-      "dept": "Travel",
-      "zone": "travel",
-      "accessory": "globe"
-    },
     "Health": {
       "dept": "Health",
       "zone": "health",
@@ -293,11 +288,6 @@
       "dept": "Productivity",
       "zone": "productivity",
       "accessory": "book"
-    },
-    "operator": {
-      "dept": "Ops",
-      "zone": "ops",
-      "accessory": "radio"
     }
   },
   "rooms": {
@@ -307,5 +297,9 @@
     "lounge": "Lounge (waiting/handoff)",
     "idle": "Break room (idle)",
     "research": "Research area"
+  },
+  "aliases": {
+    "Travel": "Bookings",
+    "operator": "Operator"
   }
 }

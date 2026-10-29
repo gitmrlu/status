@@ -102,7 +102,7 @@ const ST=[['blocked_max','Blocked on Max','#f43f5e'],['blocked_other','Blocked (
 const STALE_MS=12*60*60*1000; // dim bots with no update in 12h
 const WORK_STALE_MS=10*60*1000; // working status goes stale after 10 minutes
 const FEED_QUIET_MS=45*60*1000; // warn only if no row updated in 45+ minutes
-const BOT_DEPTS={"byName":{"Grok Bot":{"dept":"Lead","zone":"lead","accessory":"crown","note":"HQ glass corner office"},"Grok Bot Bot":{"dept":"Ops","zone":"ops","accessory":"clipboard","note":"status dashboard"},"Operator":{"dept":"Ops","zone":"ops","accessory":"radio","note":"dispatch"},"1502":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell Upstay":{"dept":"Hospitality","zone":"hospitality","accessory":"luggage"},"Bookings":{"dept":"Travel","zone":"travel","accessory":"globe"},"Travel":{"dept":"Travel","zone":"travel","accessory":"globe"},"Health":{"dept":"Health","zone":"health","accessory":"cross"},"Jovia Phil":{"dept":"Jovia","zone":"jovia","accessory":"heart"},"Jovia Health MGMT":{"dept":"Jovia","zone":"jovia","accessory":"cross"},"Jovia Health Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone"},"Jovia Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone"},"Wealth":{"dept":"Finance","zone":"finance","accessory":"coin"},"Todoist":{"dept":"Productivity","zone":"productivity","accessory":"checklist"},"Life Timeline":{"dept":"Personal","zone":"personal","accessory":"book"},"Privacy Opt-outs":{"dept":"Privacy","zone":"privacy","accessory":"shield"},"Restaurant Finder \u00b7 Dining":{"dept":"Dining","zone":"dining","accessory":"fork"},"Faceless Channel":{"dept":"Content","zone":"content","accessory":"camera"},"Browser Worker":{"dept":"Workers","zone":"workers","accessory":"wrench"},"Errands Worker":{"dept":"Workers","zone":"workers","accessory":"bag"},"Affiliate Marketing":{"dept":"Ventures","zone":"ventures","accessory":"chart"},"Dropshipping":{"dept":"Ventures","zone":"ventures","accessory":"box"},"Crypto Trader":{"dept":"Ventures","zone":"ventures","accessory":"coin"},"Digital Product":{"dept":"Ventures","zone":"ventures","accessory":"cube"},"Loyalty & Status":{"dept":"Ventures","zone":"ventures","accessory":"star"},"Notion":{"dept":"Productivity","zone":"productivity","accessory":"book"},"operator":{"dept":"Ops","zone":"ops","accessory":"radio"}},"zones":{"lead":{"label":"LEAD","color":"#e2e8f0","origin":[-3.5,0,-6.8],"w":5.5,"d":4.5},"ops":{"label":"OPS","color":"#93c5fd","origin":[2.5,0,-6.5],"w":5.0,"d":4.2},"hospitality":{"label":"HOSPITALITY","color":"#67e8f9","origin":[8.2,0,-5.8],"w":5.5,"d":5.0},"travel":{"label":"TRAVEL","color":"#93c5fd","origin":[8.5,0,0.5],"w":5.0,"d":4.0},"health":{"label":"HEALTH","color":"#fda4af","origin":[-9.5,0,5.5],"w":5.0,"d":4.0},"jovia":{"label":"JOVIA","color":"#86efac","origin":[-3.5,0,5.8],"w":6.0,"d":4.5},"finance":{"label":"FINANCE","color":"#c4b5fd","origin":[3.5,0,5.8],"w":5.0,"d":4.0},"productivity":{"label":"PRODUCTIVITY","color":"#93c5fd","origin":[9.0,0,5.5],"w":5.0,"d":4.0},"personal":{"label":"PERSONAL","color":"#a5b4fc","origin":[-9.0,0,1.5],"w":4.5,"d":3.5},"privacy":{"label":"PRIVACY","color":"#7dd3fc","origin":[0.5,0,1.2],"w":4.0,"d":3.2},"dining":{"label":"DINING","color":"#fdba74","origin":[5.0,0,1.2],"w":4.0,"d":3.2},"content":{"label":"CONTENT","color":"#fdba74","origin":[-9.0,0,-2.0],"w":4.5,"d":3.8},"workers":{"label":"WORKERS","color":"#cbd5e1","origin":[8.5,0,-1.8],"w":4.5,"d":3.5},"ventures":{"label":"VENTURES","color":"#94a3b8","origin":[2.0,0,-2.2],"w":5.5,"d":3.8}}};
+const BOT_DEPTS={"byName":{"Grok Bot":{"dept":"Lead","zone":"lead","accessory":"crown","note":"HQ glass corner office"},"Grok Bot Bot":{"dept":"Ops","zone":"ops","accessory":"clipboard","note":"status dashboard"},"Operator":{"dept":"Ops","zone":"ops","accessory":"radio","note":"dispatch"},"1502":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell Upstay":{"dept":"Hospitality","zone":"hospitality","accessory":"luggage"},"Bookings":{"dept":"Travel","zone":"travel","accessory":"globe"},"Health":{"dept":"Health","zone":"health","accessory":"cross"},"Jovia Phil":{"dept":"Jovia","zone":"jovia","accessory":"heart"},"Jovia Health MGMT":{"dept":"Jovia","zone":"jovia","accessory":"cross"},"Jovia Health Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone"},"Jovia Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone"},"Wealth":{"dept":"Finance","zone":"finance","accessory":"coin"},"Todoist":{"dept":"Productivity","zone":"productivity","accessory":"checklist"},"Life Timeline":{"dept":"Personal","zone":"personal","accessory":"book"},"Privacy Opt-outs":{"dept":"Privacy","zone":"privacy","accessory":"shield"},"Restaurant Finder \u00b7 Dining":{"dept":"Dining","zone":"dining","accessory":"fork"},"Faceless Channel":{"dept":"Content","zone":"content","accessory":"camera"},"Browser Worker":{"dept":"Workers","zone":"workers","accessory":"wrench"},"Errands Worker":{"dept":"Workers","zone":"workers","accessory":"bag"},"Affiliate Marketing":{"dept":"Ventures","zone":"ventures","accessory":"chart"},"Dropshipping":{"dept":"Ventures","zone":"ventures","accessory":"box"},"Crypto Trader":{"dept":"Ventures","zone":"ventures","accessory":"coin"},"Digital Product":{"dept":"Ventures","zone":"ventures","accessory":"cube"},"Loyalty & Status":{"dept":"Ventures","zone":"ventures","accessory":"star"},"Notion":{"dept":"Productivity","zone":"productivity","accessory":"book"}},"zones":{"lead":{"label":"LEAD","color":"#e2e8f0","origin":[-3.5,0,-6.8],"w":5.5,"d":4.5},"ops":{"label":"OPS","color":"#93c5fd","origin":[2.5,0,-6.5],"w":5.0,"d":4.2},"hospitality":{"label":"HOSPITALITY","color":"#67e8f9","origin":[8.2,0,-5.8],"w":5.5,"d":5.0},"travel":{"label":"TRAVEL","color":"#93c5fd","origin":[8.5,0,0.5],"w":5.0,"d":4.0},"health":{"label":"HEALTH","color":"#fda4af","origin":[-9.5,0,5.5],"w":5.0,"d":4.0},"jovia":{"label":"JOVIA","color":"#86efac","origin":[-3.5,0,5.8],"w":6.0,"d":4.5},"finance":{"label":"FINANCE","color":"#c4b5fd","origin":[3.5,0,5.8],"w":5.0,"d":4.0},"productivity":{"label":"PRODUCTIVITY","color":"#93c5fd","origin":[9.0,0,5.5],"w":5.0,"d":4.0},"personal":{"label":"PERSONAL","color":"#a5b4fc","origin":[-9.0,0,1.5],"w":4.5,"d":3.5},"privacy":{"label":"PRIVACY","color":"#7dd3fc","origin":[0.5,0,1.2],"w":4.0,"d":3.2},"dining":{"label":"DINING","color":"#fdba74","origin":[5.0,0,1.2],"w":4.0,"d":3.2},"content":{"label":"CONTENT","color":"#fdba74","origin":[-9.0,0,-2.0],"w":4.5,"d":3.8},"workers":{"label":"WORKERS","color":"#cbd5e1","origin":[8.5,0,-1.8],"w":4.5,"d":3.5},"ventures":{"label":"VENTURES","color":"#94a3b8","origin":[2.0,0,-2.2],"w":5.5,"d":3.8}}};
 const ROOM_COL={needs:0xf43f5e,lead:0xe2e8f0,desk:0x3b82f6,lounge:0xa855f7,idle:0x94a3b8};
 const $=s=>document.querySelector(s),esc=s=>(s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let items=new Map(),selectedBot=null,officeReady=false,simulating=false,simTimer=null,hoveredBot=null,researchScreens=[],summonedBot=null,maxPerson=null,maxDeskFront=null,maxStandPos=null;
@@ -177,11 +177,20 @@ function softResolveLabel(r){
   if(n.includes('[Ack by Max'))return 'Ack\'d';
   return null;
 }
+// Merge phantom / alias bot names — never spawn a desk for a non-existent bot
+const BOT_CANON={'Travel':'Bookings','travel':'Bookings','operator':'Operator'};
+function canonBot(name){
+  if(!name)return name;
+  if(BOT_CANON[name])return BOT_CANON[name];
+  if(String(name).toLowerCase()==='operator')return 'Operator';
+  return name;
+}
 function summarizeBots(){
   const map=new Map();
   for(const r of items.values()){
     if(isUsageMeter(r))continue;
-    let b=map.get(r.bot);if(!b){const av=botAvatar(r.bot);b={bot:r.bot,slug:r.slug,color:av.hex,shape:av.shape||'blob',counts:{},latest:null,activeLatest:null,items:[]};map.set(r.bot,b)}
+    const botName=canonBot(r.bot);
+    let b=map.get(botName);if(!b){const av=botAvatar(botName)||botAvatar(r.bot);b={bot:botName,slug:r.slug,color:av.hex,shape:av.shape||'blob',counts:{},latest:null,activeLatest:null,items:[]};map.set(botName,b)}
     b.items.push(r);b.counts[r.status]=(b.counts[r.status]||0)+1;
     if(!b.latest||r.updated_at>b.latest)b.latest=r.updated_at;
     if(r.status!=='done'&&(!b.activeLatest||r.updated_at>b.activeLatest))b.activeLatest=r.updated_at;
@@ -233,17 +242,38 @@ let zoneMeshes={};
 const isMobile=()=>matchMedia('(max-width:768px)').matches||navigator.maxTouchPoints>1;
 
 function makeLabel(text,color='#94a3b8',scale=1,opts={}){
-  // ~30% larger than v3 baseline; low-contrast; full name on hover/tap via panel
-  const base=1.32;
-  const c=document.createElement('canvas');c.width=640;c.height=144;const g=c.getContext('2d');
-  g.clearRect(0,0,640,144);
-  g.fillStyle='rgba(0,0,0,0.42)';g.beginPath();g.roundRect(16,40,608,64,16);g.fill();
-  g.fillStyle=color;g.font='bold 40px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';
-  let t=text;if(g.measureText(t).width>560){while(t.length>3&&g.measureText(t+'…').width>560)t=t.slice(0,-1);t+='…'}
-  g.fillText(t,320,72);
+  // Text ~30% larger than v3; plate tight around glyphs (no huge overlapping slabs)
+  const fontSize=Math.round(28*1.30);
+  const padX=14, padY=7, maxText=380;
+  const probe=document.createElement('canvas').getContext('2d');
+  probe.font=`bold ${fontSize}px system-ui,sans-serif`;
+  let t=String(text||'');
+  if(probe.measureText(t).width>maxText){
+    while(t.length>3&&probe.measureText(t+'…').width>maxText)t=t.slice(0,-1);
+    t+='…';
+  }
+  const tw=Math.ceil(probe.measureText(t).width);
+  const boxW=tw+padX*2, boxH=fontSize+padY*2;
+  const c=document.createElement('canvas');
+  c.width=Math.min(512, Math.max(48, boxW+4));
+  c.height=Math.min(96, Math.max(28, boxH+4));
+  const g=c.getContext('2d');
+  g.clearRect(0,0,c.width,c.height);
+  g.font=`bold ${fontSize}px system-ui,sans-serif`;
+  const bx=(c.width-boxW)/2, by=(c.height-boxH)/2;
+  g.fillStyle='rgba(0,0,0,0.45)';
+  g.beginPath();g.roundRect(bx,by,boxW,boxH,9);g.fill();
+  g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';
+  g.fillText(t,c.width/2,c.height/2+0.5);
   const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
-  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false,opacity:opts.full?0.95:0.82}));
-  sp.scale.set(3.7*base*scale,0.85*base*scale,1);sp.center.set(0.5,0);return sp;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false,opacity:opts.full?0.95:0.8}));
+  // Keep text readable (~30% up) but world plate stays snug — cap width so long names don't slab
+  const worldH=0.40*scale;
+  const aspect=c.width/c.height;
+  const worldW=Math.min(2.15, worldH*aspect);
+  sp.scale.set(worldW, worldH, 1);
+  sp.center.set(0.5,0);
+  return sp;
 }
 function floorLabel(text,color){
   const c=document.createElement('canvas');c.width=1024;c.height=256;const g=c.getContext('2d');
@@ -720,8 +750,7 @@ function applyBots(instant){
       if(!a){
         const group=makeActor(b.color,b.shape||'blob',b.accessory||'clipboard');
         group.userData.bot=b.bot;
-        const crowded0=room==='needs'&&list.length>6;
-        const label=makeLabel(b.bot,'#94a3b8',crowded0?0.7:1);label.position.set(0,crowded0?1.4:1.55,0);group.add(label);group.userData.label=label;
+        const label=makeLabel(b.bot,'#94a3b8',1);label.position.set(0,1.62,0);group.add(label);group.userData.label=label;
         group.position.copy(instant?target:new THREE.Vector3(0,0,8));
         root.add(group);
         a={group,target:target.clone(),homeTarget:target.clone(),summoned:false,wiggleUntil:0,room,color:b.color,shape:b.shape,stale:b.stale,bob:Math.random()*Math.PI*2,walk:0};
@@ -731,9 +760,8 @@ function applyBots(instant){
         const pos=a.group.position.clone();const rot=a.group.rotation.y;
         root.remove(a.group);
         const group=makeActor(b.color,b.shape||'blob',b.accessory||'clipboard');group.userData.bot=b.bot;
-        const crowded0=room==='needs'&&list.length>6;
-        const label=makeLabel(b.bot+(b.stale?' · stale':''),'#94a3b8',crowded0?0.7:1);
-        label.position.set(0,crowded0?1.4:1.55,0);group.add(label);group.userData.label=label;
+        const label=makeLabel(b.bot+(b.stale?' · stale':''),'#94a3b8',1);
+        label.position.set(0,1.62,0);group.add(label);group.userData.label=label;
         group.position.copy(pos);group.rotation.y=rot;root.add(group);a.group=group;a.shape=b.shape;a.color=b.color;
       }
       a.homeTarget=a.homeTarget||target.clone();a.homeTarget.copy(target);
@@ -753,15 +781,18 @@ function applyBots(instant){
       const op=b.stale?0.35:1;
       a.group.userData.body.material.opacity=op;a.group.userData.body.material.transparent=b.stale;
       a.group.userData.head.material.opacity=op;a.group.userData.head.material.transparent=b.stale;
-      // refresh label
+      // refresh label — tight plate; stagger when crowded; far ones hidden in updateLabelVisibility
       const old=a.group.userData.label;a.group.remove(old);if(old.material.map)old.material.map.dispose();old.material.dispose();
-      const crowded=room==='needs'&&list.length>6;
-      const showFull=(hoveredBot===b.bot||selectedBot===b.bot);
-      const tag=showFull?b.bot:(b.bot.length>18?b.bot.slice(0,16)+'…':b.bot);
-      const suffix=(b.stale?' · stale':'')+(b.workStale?' · work stale':'');
-      const label=makeLabel(tag+suffix, '#94a3b8', crowded?0.72:1, {full:showFull});
-      label.position.set(crowded?((i%3)-1)*0.4:0, crowded?1.35+(i%4)*0.32:1.7, 0);
-      a.group.add(label);a.group.userData.label=label;
+      const crowded=list.length>5;
+      const showFull=(hoveredBot===b.bot||selectedBot===b.bot||a.summoned);
+      const tag=showFull?b.bot:(b.bot.length>12?b.bot.slice(0,11)+'…':b.bot);
+      // Suffix only when focused — cuts plate width in crowds
+      const suffix=showFull?((b.stale?' · stale':'')+(b.workStale?' · work stale':'')):'';
+      const label=makeLabel(tag+suffix, '#94a3b8', crowded?0.85:1, {full:showFull});
+      const staggerX=crowded?((i%5)-2)*0.28:0;
+      const staggerY=1.58+(crowded?(i%4)*0.34:0);
+      label.position.set(staggerX, staggerY, 0);
+      a.group.add(label);a.group.userData.label=label;a.labelPri=i;
     });
   }
   for(const [name,a] of [...actors.entries()]){
@@ -847,6 +878,7 @@ function ensureOffice(){
     requestAnimationFrame(loop);
     const dt=Math.min(0.05,(now-last)/1000);last=now;
     animateActors(dt,now/1000);
+    updateLabelVisibility();
     updateCutaway();
     controls.update();
     renderer.render(scene,camera);
@@ -872,6 +904,30 @@ function updateCutaway(){
     else{mat.visible=true;}
     // Keep sky materials emissive readable when visible
     if(w.sky && mat.emissiveIntensity!=null){/* no-op */}
+  }
+}
+function updateLabelVisibility(){
+  if(!camera)return;
+  const cam=camera.position;
+  const rows=[];
+  for(const a of actors.values()){
+    const lab=a.group.userData.label;if(!lab)continue;
+    const name=a.group.userData.bot;
+    const force=name===hoveredBot||name===selectedBot||a.summoned;
+    const dx=a.group.position.x-cam.x,dy=a.group.position.y-cam.y,dz=a.group.position.z-cam.z;
+    const dist=Math.hypot(dx,dy,dz);
+    rows.push({lab,force,dist});
+  }
+  rows.sort((p,q)=>p.dist-q.dist);
+  // Prefer nearer tags; hide the rest until hover/tap — stops plate piles in Needs Max
+  const nearBudget=isMobile()?6:9;
+  let shown=0;
+  for(const row of rows){
+    if(row.force){row.lab.visible=true;row.lab.material.opacity=0.95;shown++;continue;}
+    if(row.dist>18||shown>=nearBudget){row.lab.visible=false;continue;}
+    row.lab.visible=true;
+    row.lab.material.opacity=row.dist>14?0.45:0.82;
+    shown++;
   }
 }
 function animateActors(dt,t){
