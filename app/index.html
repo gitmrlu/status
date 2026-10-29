@@ -56,7 +56,7 @@ button.ok{background:#22c55e;color:#fff;border-color:#22c55e}
 #plannerStatus.err{color:#ef4444}
 </style></head><body>
 <div id="login" class="hide"><h1>Bot Status · Office</h1><div id="msg">Sign in with your email. We'll email you a sign-in link.</div>
-<input id="em" type="email" value="mail.maxlu@gmail.com" autocomplete="email"><button class="p" id="send">Send sign-in link</button>
+<input id="em" type="email" value="" autocomplete="email" placeholder="you@example.com"><button class="p" id="send">Send sign-in link</button>
 <div id="otpbox" class="hide row"><input id="otp" inputmode="numeric" placeholder="6-digit code" style="flex:1"><button class="p" id="verify">Verify</button></div></div>
 <div id="app" class="hide">
 <header>
@@ -153,7 +153,9 @@ const ago=t=>{const m=(Date.now()-new Date(t))/6e4;return m<60?Math.round(m)+'m'
 
 const th=localStorage.th;if(th)document.documentElement.dataset.t=th;
 $('#th').onclick=()=>{const n=(document.documentElement.dataset.t||'dark')==='dark'?'light':'dark';document.documentElement.dataset.t=n;localStorage.th=n};
+const EMAIL_KEY='statusAppEmail';
 const em=()=>$('#em').value.trim();
+try{const saved=localStorage.getItem(EMAIL_KEY);if(saved)$('#em').value=saved}catch(_){}
 $('#send').onclick=async()=>{$('#msg').textContent='Sending…';const{error}=await sb.auth.signInWithOtp({email:em(),options:{shouldCreateUser:false,emailRedirectTo:location.origin+location.pathname}});
 $('#msg').textContent=error?error.message:'Check your email and click the sign-in link (open it in this browser).';if(!error)$('#otpbox').classList.remove('hide')};
 $('#verify').onclick=async()=>{const{error}=await sb.auth.verifyOtp({email:em(),token:$('#otp').value.trim(),type:'email'});if(error)$('#msg').textContent=error.message};
@@ -162,7 +164,11 @@ $('#out').onclick=()=>sb.auth.signOut();
 let chan;
 sb.auth.onAuthStateChange((_e,s)=>{
   $('#login').classList.toggle('hide',!!s);$('#app').classList.toggle('hide',!s);
-  if(s&&!chan)start();
+  if(s){
+    const addr=(s.user&&s.user.email)||em();
+    if(addr){try{localStorage.setItem(EMAIL_KEY,addr)}catch(_){}$('#em').value=addr}
+    if(!chan)start();
+  }
   if(!s&&chan){sb.removeChannel(chan);chan=null}
 });
 
