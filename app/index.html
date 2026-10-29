@@ -397,13 +397,13 @@ function buildOffice(){
     addFrame(0.05,glassH+0.05,0.05, x0,glassY,z);
     addFrame(0.05,glassH+0.05,0.05, x1,glassY,z);
   }
-  // Full enclosure; doorway gap on east wall toward desks (south half open)
-  framedGlassZ(gZ0, gX0, gX1);           // north
+  // Full enclosure; doorway on south-east (no mid-room east stub panel)
+  framedGlassZ(gZ0, gX0, gX1);           // north — Max's back wall
   framedGlassX(gX0, gZ0, gZ1);           // west
-  framedGlassZ(gZ1, gX0, gX1);           // south
-  framedGlassX(gX1, gZ0, (gZ0+gZ1)/2);   // east — north half only (doorway)
-  // door frame posts
-  addFrame(0.06,glassH+0.06,0.06, gX1,glassY,(gZ0+gZ1)/2);
+  framedGlassX(gX1, gZ0, gZ1);           // east — FULL (Max's side wall; was half and read as mid-room divider)
+  // south — leave a ~2.8m doorway at the SE corner only (no mid-room post)
+  framedGlassZ(gZ1, gX0, gX1-2.8);
+  addFrame(0.06,glassH+0.06,0.06, gX1-2.8,glassY,gZ1);
   addFrame(0.06,glassH+0.06,0.06, gX1,glassY,gZ1);
   const leadDesk=box(2.2,0.4,1.1,0x1e293b,{x:-10.2,y:0.45,z:-7.2});root.add(leadDesk);
   const mon=box(1.2,0.75,0.08,0x0f172a,{x:-10.2,y:1.0,z:-7.65,emissive:0xf43f5e,ei:0.6});root.add(mon);
@@ -412,18 +412,18 @@ function buildOffice(){
   // MAX — NE back corner of Needs Max, back against north+east glass, facing into room / toward camera.
   // Warm gold #E8C547 (not in bot palette). Desk parallel to east wall; Max east of desk; bots stop west (front).
   const MAX_GOLD=0xe8c547;
-  const bossX=-2.15, bossZ=-7.35; // inset from gX1≈-0.55, gZ0≈-8.7
+  const bossX=-1.55, bossZ=-7.85; // tight against gX1≈-0.55, gZ0≈-8.7
   // Desk: depth along X, width along Z (backs to east wall)
-  root.add(box(1.15,0.42,2.4,0x1e293b,{x:bossX,y:0.48,z:bossZ}));
-  root.add(box(1.05,0.08,2.3,0x334155,{x:bossX,y:0.72,z:bossZ}));
+  root.add(box(1.1,0.42,2.2,0x1e293b,{x:bossX,y:0.48,z:bossZ}));
+  root.add(box(1.0,0.08,2.1,0x334155,{x:bossX,y:0.72,z:bossZ}));
   // Monitor on room-facing (west) side
-  root.add(box(0.07,0.55,0.95,0x0f172a,{x:bossX-0.52,y:1.15,z:bossZ,emissive:0xe8c547,ei:0.55}));
-  root.add(box(0.25,0.12,0.35,0xf8fafc,{x:bossX+0.15,y:0.82,z:bossZ+0.85}));
-  const bossPlate=floorLabel('MAX','#E8C547');bossPlate.scale.set(0.42,0.42,0.42);bossPlate.position.set(bossX-1.35,0.05,bossZ);root.add(bossPlate);
-  // Behind desk toward east+north walls
-  maxStandPos=new THREE.Vector3(bossX+0.85,0,bossZ-0.35);
-  // In front of desk (into room) for summoned bots
-  maxDeskFront=new THREE.Vector3(bossX-1.35,0,bossZ+0.15);
+  root.add(box(0.07,0.55,0.9,0x0f172a,{x:bossX-0.5,y:1.15,z:bossZ,emissive:0xe8c547,ei:0.55}));
+  root.add(box(0.25,0.12,0.35,0xf8fafc,{x:bossX+0.1,y:0.82,z:bossZ+0.75}));
+  const bossPlate=floorLabel('MAX','#E8C547');bossPlate.scale.set(0.38,0.38,0.38);bossPlate.position.set(bossX-1.2,0.05,bossZ);root.add(bossPlate);
+  // Behind desk, back nearly touching east+north glass
+  maxStandPos=new THREE.Vector3(bossX+0.7,0,bossZ-0.45);
+  // In front of desk (into room / toward camera) for summoned bots
+  maxDeskFront=new THREE.Vector3(bossX-1.25,0,bossZ+0.2);
   maxPerson=makeMaxPerson();
   maxPerson.userData.isMax=true;maxPerson.userData.bot=null;
   const maxLab=makeLabel('Max','#E8C547',0.8,{full:true});maxLab.position.set(0,1.85,0);maxPerson.add(maxLab);
@@ -1125,11 +1125,13 @@ function setTod(mode){
 document.querySelectorAll('.tod button').forEach(b=>b.onclick=()=>setTod(b.dataset.tod));
 
 
+
+
 window.__summonBot=(name)=>{summonToMax(name);selectedBot=name;renderPanel(name)};
 window.__dismissSummon=()=>dismissSummon();
 window.__officeProbe=()=>{const a=summonedBot&&actors.get(summonedBot);const dist=a&&a.target?Math.hypot(a.target.x-a.group.position.x,a.target.z-a.group.position.z):null;let labelsTotal=0,labelsVisible=0;for(const act of actors.values()){const lab=act.group.userData.label;if(!lab)continue;labelsTotal++;if(lab.visible)labelsVisible++}return{actorCount:actors.size,names:[...actors.keys()],maxOk:!!maxPerson&&!!maxDeskFront,summoned:summonedBot,wiggling:!!(a&&a.wiggleUntil&&performance.now()<a.wiggleUntil),dist,desk:maxDeskFront?{x:maxDeskFront.x,z:maxDeskFront.z}:null,botIdSample:botId('Grok Bot Bot'),panelLink:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('href')||null,needsCount:summarizeBots().filter(b=>b.room==='needs').length,labelsTotal,labelsVisible};};
 window.__aimMaxDesk=()=>{if(!controls||!maxStandPos)return;controls.target.set(maxStandPos.x,0.7,maxStandPos.z);camera.position.set(maxStandPos.x-6.5,7.2,maxStandPos.z-5.8);controls.update()};
-window.__aimMaxCorner=()=>{if(!controls||!maxStandPos)return;controls.target.set(maxStandPos.x-0.4,0.85,maxStandPos.z+0.2);camera.position.set(maxStandPos.x-4.2,5.4,maxStandPos.z-3.6);controls.update()};
+window.__aimMaxCorner=()=>{if(!controls||!maxStandPos)return;controls.target.set(maxStandPos.x-0.2,0.95,maxStandPos.z+0.15);camera.position.set(maxStandPos.x-5.2,5.6,maxStandPos.z+3.4);controls.update()};
 window.__resetCam=()=>{if(!controls||!camera)return;camera.position.set(-18.5,12.2,-16.5);controls.target.set(-5.2,0.4,-4.0);controls.update()};
 window.__closePanel=()=>{dismissSummon();selectedBot=null;const panel=document.querySelector('#officePanel');if(panel){panel.classList.remove('open');panel.innerHTML=''}};
 function setSimulating(on){
