@@ -49,9 +49,9 @@ python3 /workspace/status-data/planners_sync.py
 
 Uses `/workspace/.supabase_service_key` (never commit or print). Upserts:
 
-- Table `public.private_docs` (RLS: JWT email `mail.maxlu@gmail.com` only)
+- Table `public.private_docs` (RLS: JWT email = the owner's login only)
 - Storage bucket `private-planners` (same auth rule)
 
 ## Auth
 
-Email OTP to `mail.maxlu@gmail.com` (signups disabled). Same session unlocks Office data and planners.
+Email OTP to the owner's login email (signups disabled). Same session unlocks Office data and planners.
