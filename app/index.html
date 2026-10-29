@@ -120,7 +120,7 @@ const ST=[['blocked_max','Blocked on Max','#f43f5e'],['blocked_other','Blocked (
 const STALE_MS=12*60*60*1000; // dim bots with no update in 12h
 const WORK_STALE_MS=10*60*1000; // working status goes stale after 10 minutes
 const FEED_QUIET_MS=45*60*1000; // warn only if no row updated in 45+ minutes
-const BOT_DEPTS={"byName":{"Grok Bot":{"dept":"Lead","zone":"lead","accessory":"crown","note":"HQ glass corner office"},"Grok Bot Bot":{"dept":"Ops","zone":"ops","accessory":"clipboard","note":"status dashboard"},"Operator":{"dept":"Ops","zone":"ops","accessory":"radio","note":"dispatch"},"1502":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell Upstay":{"dept":"Hospitality","zone":"hospitality","accessory":"luggage"},"Bookings":{"dept":"Travel","zone":"travel","accessory":"globe"},"Health":{"dept":"Health","zone":"health","accessory":"cross"},"Jovia Phil":{"dept":"Jovia","zone":"jovia","accessory":"heart"},"Jovia Health MGMT":{"dept":"Jovia","zone":"jovia","accessory":"cross"},"Jovia Health Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone"},"Jovia Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone"},"Wealth":{"dept":"Finance","zone":"finance","accessory":"coin"},"Todoist":{"dept":"Productivity","zone":"productivity","accessory":"checklist"},"Life Timeline":{"dept":"Personal","zone":"personal","accessory":"book"},"Privacy Opt-outs":{"dept":"Privacy","zone":"privacy","accessory":"shield"},"Restaurant Finder \u00b7 Dining":{"dept":"Dining","zone":"dining","accessory":"fork"},"Faceless Channel":{"dept":"Content","zone":"content","accessory":"camera"},"Browser Worker":{"dept":"Workers","zone":"workers","accessory":"wrench"},"Errands Worker":{"dept":"Workers","zone":"workers","accessory":"bag"},"Affiliate Marketing":{"dept":"Ventures","zone":"ventures","accessory":"chart"},"Dropshipping":{"dept":"Ventures","zone":"ventures","accessory":"box"},"Crypto Trader":{"dept":"Ventures","zone":"ventures","accessory":"coin"},"Digital Product":{"dept":"Ventures","zone":"ventures","accessory":"cube"},"Loyalty & Status":{"dept":"Ventures","zone":"ventures","accessory":"star"},"Notion":{"dept":"Productivity","zone":"productivity","accessory":"book"}},"zones":{"lead":{"label":"LEAD","color":"#e2e8f0","origin":[-3.5,0,-6.8],"w":5.5,"d":4.5},"ops":{"label":"OPS","color":"#93c5fd","origin":[2.5,0,-6.5],"w":5.0,"d":4.2},"hospitality":{"label":"HOSPITALITY","color":"#67e8f9","origin":[8.2,0,-5.8],"w":5.5,"d":5.0},"travel":{"label":"TRAVEL","color":"#93c5fd","origin":[8.5,0,0.5],"w":5.0,"d":4.0},"health":{"label":"HEALTH","color":"#fda4af","origin":[-9.5,0,5.5],"w":5.0,"d":4.0},"jovia":{"label":"JOVIA","color":"#86efac","origin":[-3.5,0,5.8],"w":6.0,"d":4.5},"finance":{"label":"FINANCE","color":"#c4b5fd","origin":[3.5,0,5.8],"w":5.0,"d":4.0},"productivity":{"label":"PRODUCTIVITY","color":"#93c5fd","origin":[9.0,0,5.5],"w":5.0,"d":4.0},"personal":{"label":"PERSONAL","color":"#a5b4fc","origin":[-9.0,0,1.5],"w":4.5,"d":3.5},"privacy":{"label":"PRIVACY","color":"#7dd3fc","origin":[0.5,0,1.2],"w":4.0,"d":3.2},"dining":{"label":"DINING","color":"#fdba74","origin":[5.0,0,1.2],"w":4.0,"d":3.2},"content":{"label":"CONTENT","color":"#fdba74","origin":[-9.0,0,-2.0],"w":4.5,"d":3.8},"workers":{"label":"WORKERS","color":"#cbd5e1","origin":[8.5,0,-1.8],"w":4.5,"d":3.5},"ventures":{"label":"VENTURES","color":"#94a3b8","origin":[2.0,0,-2.2],"w":5.5,"d":3.8}}};
+const BOT_DEPTS={"byName":{"Grok Bot":{"dept":"Lead","zone":"lead","accessory":"crown","note":"HQ glass corner office"},"Grok Bot Bot":{"dept":"Ops","zone":"ops","accessory":"clipboard","note":"status dashboard"},"Operator":{"dept":"Ops","zone":"ops","accessory":"radio","note":"dispatch"},"1502":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell Upstay":{"dept":"Hospitality","zone":"hospitality","accessory":"luggage"},"Bookings":{"dept":"Travel","zone":"travel","accessory":"globe"},"Health":{"dept":"Health","zone":"health","accessory":"cross"},"Jovia Phil":{"dept":"Jovia","zone":"jovia","accessory":"heart"},"Jovia Health MGMT":{"dept":"Jovia","zone":"jovia","accessory":"cross"},"Jovia Health Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone"},"Jovia Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone"},"Wealth":{"dept":"Finance","zone":"finance","accessory":"coin"},"Todoist":{"dept":"Productivity","zone":"productivity","accessory":"checklist"},"Life Timeline":{"dept":"Personal","zone":"personal","accessory":"book"},"Privacy Opt-outs":{"dept":"Privacy","zone":"privacy","accessory":"shield"},"Restaurant Finder \u00b7 Dining":{"dept":"Dining","zone":"dining","accessory":"fork"},"Faceless Channel":{"dept":"Content","zone":"content","accessory":"camera"},"Browser Worker":{"dept":"Workers","zone":"workers","accessory":"wrench"},"Errands Worker":{"dept":"Workers","zone":"workers","accessory":"bag"},"Affiliate Marketing":{"dept":"Ventures","zone":"ventures","accessory":"chart"},"Dropshipping":{"dept":"Ventures","zone":"ventures","accessory":"box"},"Crypto Trader":{"dept":"Ventures","zone":"ventures","accessory":"coin"},"Digital Product":{"dept":"Ventures","zone":"ventures","accessory":"cube"},"Loyalty & Status":{"dept":"Ventures","zone":"ventures","accessory":"star"},"Notion":{"dept":"Productivity","zone":"productivity","accessory":"book"}},"zones":{"lead":{"label":"LEAD","color":"#e2e8f0","origin":[2.5,0,-6.8],"w":5.0,"d":4.2},"ops":{"label":"OPS","color":"#93c5fd","origin":[2.5,0,-6.5],"w":5.0,"d":4.2},"hospitality":{"label":"HOSPITALITY","color":"#67e8f9","origin":[8.2,0,-5.8],"w":5.5,"d":5.0},"travel":{"label":"TRAVEL","color":"#93c5fd","origin":[8.5,0,0.5],"w":5.0,"d":4.0},"health":{"label":"HEALTH","color":"#fda4af","origin":[-9.5,0,5.5],"w":5.0,"d":4.0},"jovia":{"label":"JOVIA","color":"#86efac","origin":[-3.5,0,5.8],"w":6.0,"d":4.5},"finance":{"label":"FINANCE","color":"#c4b5fd","origin":[3.5,0,5.8],"w":5.0,"d":4.0},"productivity":{"label":"PRODUCTIVITY","color":"#93c5fd","origin":[9.0,0,5.5],"w":5.0,"d":4.0},"personal":{"label":"PERSONAL","color":"#a5b4fc","origin":[-9.0,0,1.5],"w":4.5,"d":3.5},"privacy":{"label":"PRIVACY","color":"#7dd3fc","origin":[0.5,0,1.2],"w":4.0,"d":3.2},"dining":{"label":"DINING","color":"#fdba74","origin":[5.0,0,1.2],"w":4.0,"d":3.2},"content":{"label":"CONTENT","color":"#fdba74","origin":[-9.0,0,-2.0],"w":4.5,"d":3.8},"workers":{"label":"WORKERS","color":"#cbd5e1","origin":[8.5,0,-1.8],"w":4.5,"d":3.5},"ventures":{"label":"VENTURES","color":"#94a3b8","origin":[2.0,0,-2.2],"w":5.5,"d":3.8}}};
 const ROOM_COL={needs:0xf43f5e,lead:0xe2e8f0,desk:0x3b82f6,lounge:0xa855f7,idle:0x94a3b8};
 const $=s=>document.querySelector(s),esc=s=>(s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let items=new Map(),selectedBot=null,officeReady=false,simulating=false,simTimer=null,hoveredBot=null,researchScreens=[],summonedBot=null,maxPerson=null,maxDeskFront=null,maxStandPos=null;
@@ -409,21 +409,27 @@ function buildOffice(){
   const mon=box(1.2,0.75,0.08,0x0f172a,{x:-10.2,y:1.0,z:-7.65,emissive:0xf43f5e,ei:0.6});root.add(mon);
   zoneMeshes.needs={origin:new THREE.Vector3(-6.8,0,-3.6),w:12.5,d:10.2};
 
-  // MAX — boss desk at front of Needs Max (default camera view). Warm gold #E8C547 (not in bot palette).
+  // MAX — NE back corner of Needs Max, back against north+east glass, facing into room / toward camera.
+  // Warm gold #E8C547 (not in bot palette). Desk parallel to east wall; Max east of desk; bots stop west (front).
   const MAX_GOLD=0xe8c547;
-  const bossX=-4.5, bossZ=-0.35;
-  root.add(box(2.6,0.42,1.25,0x1e293b,{x:bossX,y:0.48,z:bossZ}));
-  root.add(box(2.5,0.08,1.15,0x334155,{x:bossX,y:0.72,z:bossZ}));
-  root.add(box(0.95,0.55,0.07,0x0f172a,{x:bossX-0.55,y:1.15,z:bossZ-0.45,emissive:0xe8c547,ei:0.55}));
-  root.add(box(0.35,0.12,0.25,0xf8fafc,{x:bossX+0.85,y:0.82,z:bossZ+0.15}));
-  const bossPlate=floorLabel('MAX','#E8C547');bossPlate.scale.set(0.42,0.42,0.42);bossPlate.position.set(bossX,0.05,bossZ+1.35);root.add(bossPlate);
-  maxStandPos=new THREE.Vector3(bossX,0,bossZ-0.95);
-  maxDeskFront=new THREE.Vector3(bossX,0,bossZ+1.15);
+  const bossX=-2.15, bossZ=-7.35; // inset from gX1≈-0.55, gZ0≈-8.7
+  // Desk: depth along X, width along Z (backs to east wall)
+  root.add(box(1.15,0.42,2.4,0x1e293b,{x:bossX,y:0.48,z:bossZ}));
+  root.add(box(1.05,0.08,2.3,0x334155,{x:bossX,y:0.72,z:bossZ}));
+  // Monitor on room-facing (west) side
+  root.add(box(0.07,0.55,0.95,0x0f172a,{x:bossX-0.52,y:1.15,z:bossZ,emissive:0xe8c547,ei:0.55}));
+  root.add(box(0.25,0.12,0.35,0xf8fafc,{x:bossX+0.15,y:0.82,z:bossZ+0.85}));
+  const bossPlate=floorLabel('MAX','#E8C547');bossPlate.scale.set(0.42,0.42,0.42);bossPlate.position.set(bossX-1.35,0.05,bossZ);root.add(bossPlate);
+  // Behind desk toward east+north walls
+  maxStandPos=new THREE.Vector3(bossX+0.85,0,bossZ-0.35);
+  // In front of desk (into room) for summoned bots
+  maxDeskFront=new THREE.Vector3(bossX-1.35,0,bossZ+0.15);
   maxPerson=makeMaxPerson();
   maxPerson.userData.isMax=true;maxPerson.userData.bot=null;
   const maxLab=makeLabel('Max','#E8C547',0.8,{full:true});maxLab.position.set(0,1.85,0);maxPerson.add(maxLab);
   maxPerson.position.copy(maxStandPos);
-  maxPerson.rotation.y=0;
+  // Face west into room / toward default camera
+  maxPerson.rotation.y=Math.atan2(maxDeskFront.x-maxStandPos.x, maxDeskFront.z-maxStandPos.z);
   root.add(maxPerson);
 
   // DESKS — working
@@ -478,9 +484,9 @@ function buildOffice(){
     zoneMeshes[zkey]={origin:new THREE.Vector3(zdef.origin[0],0,zdef.origin[2]),w:zdef.w,d:zdef.d};
     root.add(box(1.2,0.32,0.7,0x334155,{x:zdef.origin[0],y:0.35,z:zdef.origin[2]-zdef.d*0.28}));
   }
-  // Lead glass corner office (Grok Bot) — next to Needs Max, also never cut away
+  // Lead glass corner office (Grok Bot) — EAST of Needs Max (no panels inside Max's room)
   {
-    const lx=-3.5,lz=-6.8,lw=5.2,ld=4.2;
+    const lx=2.5,lz=-6.8,lw=4.8,ld=4.0; // west edge ≈+0.1, clear of Needs Max east ≈-0.55
     const x0=lx-lw/2,x1=lx+lw/2,z0=lz-ld/2,z1=lz+ld/2;
     function gMat(){return new THREE.MeshStandardMaterial({color:0xe0f2fe,transparent:true,opacity:0.10,roughness:0.2,metalness:0.2,depthWrite:false,emissive:0xbae6fd,emissiveIntensity:0.1,side:THREE.DoubleSide})}
     function gPanel(w,h,d,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),gMat());m.position.set(x,y,z);m.renderOrder=2;root.add(m)}
@@ -672,7 +678,7 @@ function slotFor(room,index,total,bot){
     }
   }
   if(room==='lead'){
-    const z=zoneMeshes.lead||{origin:new THREE.Vector3(-3.5,0,-6.8),w:5.5,d:4.5};
+    const z=zoneMeshes.lead||{origin:new THREE.Vector3(2.5,0,-6.8),w:5.0,d:4.2};
     return new THREE.Vector3(z.origin.x,0,z.origin.z);
   }
   const z=zoneMeshes[room];if(!z)return new THREE.Vector3(0,0,0);
@@ -909,13 +915,13 @@ function ensureOffice(){
   scene=new THREE.Scene();scene.background=new THREE.Color('#0b0d12');scene.fog=new THREE.Fog('#0b0d12',28,55);
   camera=new THREE.PerspectiveCamera(40,1,0.1,100);
   // Default: Needs Max meeting room corner nearest the viewer (front)
-  camera.position.set(-19,11.5,-17);
+  camera.position.set(-18.5,12.2,-16.5);
   renderer=new THREE.WebGLRenderer({antialias:!isMobile(),alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(devicePixelRatio,isMobile()?2:2));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   host.appendChild(renderer.domElement);
   controls=new OrbitControls(camera,renderer.domElement);
-  controls.target.set(-4.5,0.35,-2.2);controls.enableDamping=true;controls.dampingFactor=0.06;
+  controls.target.set(-5.2,0.4,-4.0);controls.enableDamping=true;controls.dampingFactor=0.06;
   controls.maxPolarAngle=Math.PI*0.46;controls.minDistance=9;controls.maxDistance=34;
   controls.enablePan=!isMobile();
   hemi=new THREE.HemisphereLight(0xffe4c4,0x1e293b,0.85);scene.add(hemi);
@@ -1122,8 +1128,9 @@ document.querySelectorAll('.tod button').forEach(b=>b.onclick=()=>setTod(b.datas
 window.__summonBot=(name)=>{summonToMax(name);selectedBot=name;renderPanel(name)};
 window.__dismissSummon=()=>dismissSummon();
 window.__officeProbe=()=>{const a=summonedBot&&actors.get(summonedBot);const dist=a&&a.target?Math.hypot(a.target.x-a.group.position.x,a.target.z-a.group.position.z):null;let labelsTotal=0,labelsVisible=0;for(const act of actors.values()){const lab=act.group.userData.label;if(!lab)continue;labelsTotal++;if(lab.visible)labelsVisible++}return{actorCount:actors.size,names:[...actors.keys()],maxOk:!!maxPerson&&!!maxDeskFront,summoned:summonedBot,wiggling:!!(a&&a.wiggleUntil&&performance.now()<a.wiggleUntil),dist,desk:maxDeskFront?{x:maxDeskFront.x,z:maxDeskFront.z}:null,botIdSample:botId('Grok Bot Bot'),panelLink:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('href')||null,needsCount:summarizeBots().filter(b=>b.room==='needs').length,labelsTotal,labelsVisible};};
-window.__aimMaxDesk=()=>{if(!controls||!maxDeskFront)return;controls.target.set(maxDeskFront.x,0.55,maxDeskFront.z);camera.position.set(maxDeskFront.x-7.5,8.5,maxDeskFront.z-9.5);controls.update()};
-window.__resetCam=()=>{if(!controls||!camera)return;camera.position.set(-19,11.5,-17);controls.target.set(-4.5,0.35,-2.2);controls.update()};
+window.__aimMaxDesk=()=>{if(!controls||!maxStandPos)return;controls.target.set(maxStandPos.x,0.7,maxStandPos.z);camera.position.set(maxStandPos.x-6.5,7.2,maxStandPos.z-5.8);controls.update()};
+window.__aimMaxCorner=()=>{if(!controls||!maxStandPos)return;controls.target.set(maxStandPos.x-0.4,0.85,maxStandPos.z+0.2);camera.position.set(maxStandPos.x-4.2,5.4,maxStandPos.z-3.6);controls.update()};
+window.__resetCam=()=>{if(!controls||!camera)return;camera.position.set(-18.5,12.2,-16.5);controls.target.set(-5.2,0.4,-4.0);controls.update()};
 window.__closePanel=()=>{dismissSummon();selectedBot=null;const panel=document.querySelector('#officePanel');if(panel){panel.classList.remove('open');panel.innerHTML=''}};
 function setSimulating(on){
   simulating=!!on;
