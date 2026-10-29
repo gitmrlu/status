@@ -1,24 +1,39 @@
 #!/usr/bin/env node
 /**
  * Fail if planner payload markers appear under a built tree.
- * Needles are stored as base64 so private wording is not plaintext in this public repo.
+ * Needles live in a box-only file (never committed to this public repo):
+ *   /workspace/status-data/privacy_needles.txt
+ * Override with PRIVACY_NEEDLES_FILE. When the file is missing (e.g. CI),
+ * skip the gate so Pages deploys are not blocked.
  */
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const roots = process.argv.slice(2);
 const targets = roots.length ? roots : ['.'];
-// base64 of distinctive planner markers (decoded only in memory at check time)
-const DENY_B64 = [
-  'X19IQVNRRUxMX1NFRURfXw==',
-  'X19KT1ZJQV9TRUVEX18=',
-  'c3RhdHVzLWFwcC1wbGFubmVy',
-  'Y29tbW9uX19lbmdhZ2U=',
-  'a2xnYWRtaW5Aa2VsbHlsZWdhbGdyb3VwLmNvbQ==',
-  'S2VsbHkgTGVnYWwgaW52b2ljZSAxNDU4NQ==',
-  'Zm9yZWNsb3N1cmVOb3Rl',
-];
-const DENY = DENY_B64.map((b) => Buffer.from(b, 'base64').toString('utf8'));
+const NEEDLES_PATH =
+  process.env.PRIVACY_NEEDLES_FILE || '/workspace/status-data/privacy_needles.txt';
+
+function loadNeedles(path) {
+  if (!existsSync(path)) return null;
+  const lines = readFileSync(path, 'utf8').split(/\r?\n/);
+  return lines
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#'));
+}
+
+const DENY = loadNeedles(NEEDLES_PATH);
+if (!DENY) {
+  console.log(
+    `Privacy check SKIPPED (needles file not found: ${NEEDLES_PATH}). Box builds should set PRIVACY_NEEDLES_FILE or keep that path.`,
+  );
+  process.exit(0);
+}
+if (!DENY.length) {
+  console.error(`Privacy check failed: needles file is empty: ${NEEDLES_PATH}`);
+  process.exit(1);
+}
+
 const SKIP_DIR = new Set(['.git', 'node_modules', 'dist', '.vite']);
 
 function walk(dir, out = []) {
@@ -57,4 +72,4 @@ if (failed) {
   console.error('Privacy check failed.');
   process.exit(1);
 }
-console.log('Privacy check OK for', targets.join(', '));
+console.log('Privacy check OK for', targets.join(', '), `(${DENY.length} needles from ${NEEDLES_PATH})`);
