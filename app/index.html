@@ -51,7 +51,7 @@ button.ok{background:#22c55e;color:#fff;border-color:#22c55e}
 .view-nav button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 #plannerWrap{flex:1;min-height:0;display:none;flex-direction:column;background:var(--bg)}
 #plannerWrap.on{display:flex}
-#plannerFrame{flex:1;width:100%;border:0;background:#fff}
+#plannerFrame{flex:1;width:100%;height:100%;border:0;background:#fff;display:block}
 #plannerStatus{padding:8px 14px;font-size:12px;color:var(--mut);border-bottom:1px solid var(--bd)}
 #plannerStatus.err{color:#ef4444}
 </style></head><body>
@@ -1186,6 +1186,22 @@ const PLANNER_IDS={
 let currentView='office';
 const plannerCache=new Map(); // id -> html
 
+
+function clearPlannerFrame(frame){
+  if(!frame) return;
+  if(frame._blobUrl){try{URL.revokeObjectURL(frame._blobUrl)}catch(e){} frame._blobUrl=null}
+  frame.removeAttribute('srcdoc');
+  frame.removeAttribute('src');
+}
+function mountPlannerHtml(frame, html){
+  clearPlannerFrame(frame);
+  // blob: URL inherits the app origin (unlike about:srcdoc opaque origin), so
+  // planner localStorage keys (haskell-*, jovia-*) persist across reloads.
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  frame._blobUrl=URL.createObjectURL(blob);
+  frame.src=frame._blobUrl;
+}
+
 function setView(view){
   currentView=view;
   document.querySelectorAll('#viewNav [data-view]').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
@@ -1194,7 +1210,7 @@ function setView(view){
     plan.classList.remove('on');
     office.style.display='';
     // clear iframe to stop timers when leaving
-    const f=$('#plannerFrame'); if(f) f.removeAttribute('srcdoc');
+    clearPlannerFrame($('#plannerFrame'));
     try{ resizeOffice(); }catch(e){}
     return;
   }
@@ -1207,7 +1223,7 @@ async function loadPlanner(id){
   const st=$('#plannerStatus'), frame=$('#plannerFrame');
   st.classList.remove('err');
   st.textContent='Loading '+ (PLANNER_IDS[id]||id) +'…';
-  frame.removeAttribute('srcdoc');
+  clearPlannerFrame(frame);
   try{
     let html=plannerCache.get(id);
     if(!html){
@@ -1220,8 +1236,8 @@ async function loadPlanner(id){
     } else {
       st.textContent=(PLANNER_IDS[id]||id)+' · cached this session';
     }
-    // srcdoc + sandbox: same-origin so planner localStorage (haskell-*, jovia*) persists
-    frame.srcdoc=html;
+    // blob URL + sandbox allow-same-origin: planner localStorage persists on the app origin
+    mountPlannerHtml(frame, html);
   }catch(e){
     st.classList.add('err');
     st.textContent='Failed to load planner: '+(e.message||e);
@@ -1237,7 +1253,7 @@ $('#viewNav').addEventListener('click',e=>{
 sb.auth.onAuthStateChange((_e,s)=>{
   if(!s){
     plannerCache.clear();
-    const f=$('#plannerFrame'); if(f) f.removeAttribute('srcdoc');
+    clearPlannerFrame($('#plannerFrame'));
     currentView='office';
     document.querySelectorAll('#viewNav [data-view]').forEach(b=>b.classList.toggle('on',b.dataset.view==='office'));
     const office=$('#officeWrap'), plan=$('#plannerWrap');
