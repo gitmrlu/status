@@ -1,14 +1,15 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex"><title>Bot Status</title>
 <style>
-:root{--bg:#f6f7fb;--card:#fff;--fg:#1b1f2a;--mut:#6b7280;--bd:#e5e7eb;--acc:#4f46e5;--sh:0 1px 3px rgba(0,0,0,.06)}
+:root{--bg:#f6f7fb;--card:#fff;--fg:#1b1f2a;--mut:#6b7280;--bd:#e5e7eb;--acc:#4f46e5;--sh:0 1px 3px rgba(0,0,0,.06);--need:#ef4444;--work:#3b82f6;--wait:#a855f7;--idle:#9ca3af}
 @media(prefers-color-scheme:dark){:root{--bg:#0f1117;--card:#181b24;--fg:#e6e8ee;--mut:#9aa1ae;--bd:#2a2f3c;--acc:#818cf8;--sh:none}}
 :root[data-t=light]{--bg:#f6f7fb;--card:#fff;--fg:#1b1f2a;--mut:#6b7280;--bd:#e5e7eb;--acc:#4f46e5}
 :root[data-t=dark]{--bg:#0f1117;--card:#181b24;--fg:#e6e8ee;--mut:#9aa1ae;--bd:#2a2f3c;--acc:#818cf8}
 *{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--fg)}
 header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 h1{font-size:18px;margin:0 12px 0 0}input,select,textarea,button{font:inherit;color:inherit;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:7px 10px}
-button{cursor:pointer}button.p{background:var(--acc);color:#fff;border-color:var(--acc)}#q{flex:1;min-width:140px}
+button{cursor:pointer}button.p{background:var(--acc);color:#fff;border-color:var(--acc)}button.danger{background:#ef4444;color:#fff;border-color:#ef4444}
+button.ok{background:#22c55e;color:#fff;border-color:#22c55e}#q{flex:1;min-width:140px}
 main{padding:16px;max-width:1500px;margin:auto}.grp{margin-bottom:22px}.grp h2{font-size:14px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin:0 0 8px;display:flex;gap:8px;align-items:center}
 .cnt{background:var(--bd);border-radius:99px;padding:0 8px;font-size:12px;color:var(--fg)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
@@ -20,39 +21,109 @@ main{padding:16px;max-width:1500px;margin:auto}.grp{margin-bottom:22px}.grp h2{f
 textarea{width:100%;min-height:60px}#login{max-width:360px;margin:12vh auto;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:10px}
 #msg{color:var(--mut);font-size:13px}.hide{display:none!important}.ts{font-size:11px;color:var(--mut);margin-left:auto}
 #live{width:8px;height:8px;border-radius:50%;background:#9ca3af}#live.on{background:#22c55e}
+.tabs{display:flex;gap:4px;margin-right:8px}.tab{padding:6px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--card);font-size:13px;font-weight:600}
+.tab.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#officeWrap{display:none;position:relative;height:calc(100vh - 64px);min-height:420px}
+body.office #boardMain{display:none}body.office #officeWrap{display:flex}body.office header .board-only{display:none}
+#officeCanvas{flex:1;min-width:0;position:relative;background:#1a1d27}
+#officeCanvas canvas{display:block;width:100%;height:100%}
+#officeHud{position:absolute;left:12px;top:12px;z-index:2;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:min(340px,70vw)}
+#officeHud>*{pointer-events:auto}
+.hud{background:rgba(24,27,36,.88);color:#e6e8ee;border:1px solid #2a2f3c;border-radius:10px;padding:10px 12px;font-size:12px;backdrop-filter:blur(6px)}
+.hud h3{margin:0 0 6px;font-size:13px}.hud .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.leg{display:flex;align-items:center;gap:4px}.dot{width:8px;height:8px;border-radius:50%}
+#officePanel{width:min(380px,100%);max-width:100%;background:var(--card);border-left:1px solid var(--bd);overflow:auto;padding:14px;display:none}
+#officePanel.open{display:block}
+#officePanel h2{margin:0 0 4px;font-size:16px}#officePanel .sub{color:var(--mut);font-size:12px;margin-bottom:12px}
+.soft{font-size:11px;color:var(--mut);background:var(--bg);border:1px dashed var(--bd);border-radius:8px;padding:8px;margin:8px 0}
+.oc{border:1px solid var(--bd);border-left:4px solid var(--s);border-radius:10px;padding:10px;margin-bottom:10px}
+.oc .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+@media(max-width:768px){
+  #officeWrap{flex-direction:column;height:auto;min-height:calc(100vh - 64px)}
+  #officeCanvas{height:55vh;min-height:280px}
+  #officePanel{width:100%;border-left:0;border-top:1px solid var(--bd);max-height:45vh}
+}
 </style></head><body>
 <div id="login" class="hide"><h1>Bot Status</h1><div id="msg">Sign in with your email. We'll email you a sign-in link.</div>
 <input id="em" type="email" value="mail.maxlu@gmail.com" autocomplete="email"><button class="p" id="send">Send sign-in link</button>
 <div id="otpbox" class="hide row"><input id="otp" inputmode="numeric" placeholder="6-digit code" style="flex:1"><button class="p" id="verify">Verify</button></div></div>
-<div id="app" class="hide"><header><h1>Bot Status</h1><span id="live" title="live updates"></span>
-<input id="q" placeholder="Search…" type="search"><select id="fb"><option value="">All bots</option></select><select id="fa"><option value="">All areas</option></select>
-<label class="row" style="font-size:13px"><input type="checkbox" id="sd" checked> Done</label>
-<button id="th" title="Theme">◐</button><button id="out">Sign out</button></header><main id="main"></main></div>
+<div id="app" class="hide"><header>
+<div class="tabs"><button class="tab on" id="tabBoard" type="button">Board</button><button class="tab" id="tabOffice" type="button">Office</button></div>
+<h1>Bot Status</h1><span id="live" title="live updates"></span>
+<input id="q" class="board-only" placeholder="Search…" type="search"><select id="fb" class="board-only"><option value="">All bots</option></select><select id="fa" class="board-only"><option value="">All areas</option></select>
+<label class="row board-only" style="font-size:13px"><input type="checkbox" id="sd" checked> Done</label>
+<button id="th" title="Theme">◐</button><button id="out">Sign out</button></header>
+<main id="boardMain"></main>
+<div id="officeWrap">
+  <div id="officeCanvas">
+    <div id="officeHud">
+      <div class="hud"><h3>Office · live from status</h3>
+        <div>Click a bot to see its items. Dimmed = no update in 12h.</div>
+        <div class="legend">
+          <span class="leg"><span class="dot" style="background:var(--need)"></span>Needs Max</span>
+          <span class="leg"><span class="dot" style="background:var(--work)"></span>Working</span>
+          <span class="leg"><span class="dot" style="background:var(--wait)"></span>Waiting</span>
+          <span class="leg"><span class="dot" style="background:var(--idle)"></span>Idle</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <aside id="officePanel"></aside>
+</div>
+</div>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-const sb=createClient('https://uiljhtpohsthjibcyher.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpbGpodHBvaHN0aGppYmN5aGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjE2MDQsImV4cCI6MjEwNzYzNzYwNH0.i2uZfVUBK97G-y29EbVq1SiOb78ur7oOXL_30CMJOxY');
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpbGpodHBvaHN0aGppYmN5aGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjE2MDQsImV4cCI6MjEwNzYzNzYwNH0.i2uZfVUBK97G-y29EbVq1SiOb78ur7oOXL_30CMJOxY';
+const sb=createClient('https://uiljhtpohsthjibcyher.supabase.co',ANON);
 const ST=[['blocked_max','Blocked on Max','#ef4444'],['blocked_other','Blocked (other)','#f59e0b'],['in_progress','In progress','#3b82f6'],['waiting','Waiting','#a855f7'],['paused','Paused','#9ca3af'],['done','Done','#22c55e']];
+const STALE_MS=12*60*60*1000; // 12h — bots update far less often than every 10 min
 const $=s=>document.querySelector(s),esc=s=>(s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let items=new Map(),flash=new Set();
+let items=new Map(),flash=new Set(),view='board',selectedBot=null,officeReady=false,officeDirty=true;
+
+const COLORS=['#6366f1','#ec4899','#14b8a6','#f59e0b','#3b82f6','#a855f7','#ef4444','#22c55e','#0ea5e9','#e11d48','#84cc16','#d946ef','#f97316','#06b6d4','#8b5cf6','#10b981','#f43f5e','#64748b','#eab308','#2dd4bf','#c026d3','#fb7185'];
+function botColor(name){let h=0;for(let i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))>>>0;return COLORS[h%COLORS.length]}
+
 const th=localStorage.th;if(th)document.documentElement.dataset.t=th;
 $('#th').onclick=()=>{const n=(document.documentElement.dataset.t||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'))==='dark'?'light':'dark';document.documentElement.dataset.t=n;localStorage.th=n};
+
 const em=()=>$('#em').value.trim();
 $('#send').onclick=async()=>{$('#msg').textContent='Sending…';const{error}=await sb.auth.signInWithOtp({email:em(),options:{shouldCreateUser:false,emailRedirectTo:location.origin+location.pathname}});
 $('#msg').textContent=error?error.message:'Check your email and click the sign-in link (open it in this browser).';if(!error)$('#otpbox').classList.remove('hide')};
 $('#verify').onclick=async()=>{const{error}=await sb.auth.verifyOtp({email:em(),token:$('#otp').value.trim(),type:'email'});if(error)$('#msg').textContent=error.message};
 $('#out').onclick=()=>sb.auth.signOut();
+
+function setView(v){
+  view=v;document.body.classList.toggle('office',v==='office');
+  $('#tabBoard').classList.toggle('on',v==='board');$('#tabOffice').classList.toggle('on',v==='office');
+  if(v==='office'){ensureOffice();officeDirty=true;syncOffice();resizeOffice()}
+}
+$('#tabBoard').onclick=()=>setView('board');
+$('#tabOffice').onclick=()=>setView('office');
+
 let chan;
-sb.auth.onAuthStateChange((_e,s)=>{$('#login').classList.toggle('hide',!!s);$('#app').classList.toggle('hide',!s);if(s&&!chan)start();if(!s&&chan){sb.removeChannel(chan);chan=null}});
+sb.auth.onAuthStateChange((_e,s)=>{$('#login').classList.toggle('hide',!!s);$('#app').classList.toggle('hide',!s);if(s&&!chan)start();if(!s&&chan){sb.removeChannel(chan);chan=null;officeReady=false}});
+
 async function start(){const{data,error}=await sb.from('items').select('*').order('updated_at',{ascending:false});
-if(error){$('#main').textContent=error.message;return}items=new Map(data.map(r=>[r.id,r]));filters();render();
-chan=sb.channel('items').on('postgres_changes',{event:'*',schema:'public',table:'items'},p=>{if(p.eventType==='DELETE')items.delete(p.old.id);else{items.set(p.new.id,p.new);flash.add(p.new.id)}filters();render()}).subscribe(s=>$('#live').classList.toggle('on',s==='SUBSCRIBED'))}
+if(error){$('#boardMain').textContent=error.message;return}items=new Map(data.map(r=>[r.id,r]));filters();render();officeDirty=true;if(view==='office')syncOffice();
+chan=sb.channel('items').on('postgres_changes',{event:'*',schema:'public',table:'items'},p=>{if(p.eventType==='DELETE')items.delete(p.old.id);else{items.set(p.new.id,p.new);flash.add(p.new.id)}filters();render();officeDirty=true;if(view==='office')syncOffice();if(selectedBot)renderPanel(selectedBot)}).subscribe(s=>$('#live').classList.toggle('on',s==='SUBSCRIBED'))}
+
 function filters(){for(const[k,el,lab]of[['bot','#fb','All bots'],['area','#fa','All areas']]){const v=$(el).value,vals=[...new Set([...items.values()].map(r=>r[k]).filter(Boolean))].sort();
 $(el).innerHTML=`<option value="">${lab}</option>`+vals.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('')}}
 ['#q','#fb','#fa','#sd'].forEach(s=>$(s).addEventListener('input',render));
 const ago=t=>{const m=(Date.now()-new Date(t))/6e4;return m<60?Math.round(m)+'m':m<1440?Math.round(m/60)+'h':Math.round(m/1440)+'d'};
-function render(){const q=$('#q').value.toLowerCase(),b=$('#fb').value,a=$('#fa').value,sd=$('#sd').checked;
+
+function render(){if(view!=='board')return;const q=$('#q').value.toLowerCase(),b=$('#fb').value,a=$('#fa').value,sd=$('#sd').checked;
 const rs=[...items.values()].filter(r=>(!b||r.bot===b)&&(!a||r.area===a)&&(sd||r.status!=='done')&&(!q||[r.title,r.next,r.refs,r.bot,r.area,r.note].join(' ').toLowerCase().includes(q)));
-$('#main').innerHTML=ST.map(([k,lab,col])=>{const g=rs.filter(r=>r.status===k);if(!g.length)return'';
+$('#boardMain').innerHTML=ST.map(([k,lab,col])=>{const g=rs.filter(r=>r.status===k);if(!g.length)return'';
 return`<section class="grp"><h2><span style="color:${col}">●</span>${lab}<span class="cnt">${g.length}</span></h2><div class="grid">${g.map(r=>card(r,col)).join('')}</div></section>`}).join('')||'<p style="color:var(--mut)">Nothing matches.</p>';flash.clear()}
 function card(r,col){return`<div class="c ${flash.has(r.id)?'flash':''}" style="--s:${col}" data-id="${r.id}"><div class="t">${esc(r.title)}</div>
 <div class="m"><span class="tag">🤖 ${esc(r.bot)}</span>${r.area?`<span class="tag">${esc(r.area)}</span>`:''}<span class="ts">${ago(r.updated_at)} ago</span></div>
@@ -60,8 +131,201 @@ ${r.next?`<div class="n">${esc(r.next)}</div>`:''}${r.refs?`<div class="r">${esc
 <div class="row"><select data-a="st">${ST.map(([k,l])=>`<option value="${k}" ${k===r.status?'selected':''}>${l}</option>`).join('')}</select>
 <button class="lk" data-a="next">Edit next</button><button class="lk" data-a="note">${r.note?'Edit note':'Add note'}</button></div><div class="ed"></div></div>`}
 async function upd(id,patch){const{error}=await sb.from('items').update(patch).eq('id',id);if(error)alert(error.message)}
-$('#main').addEventListener('change',e=>{if(e.target.dataset.a==='st')upd(e.target.closest('.c').dataset.id,{status:e.target.value})});
-$('#main').addEventListener('click',e=>{const a=e.target.dataset.a;if(a!=='next'&&a!=='note')return;const c=e.target.closest('.c'),r=items.get(c.dataset.id),ed=c.querySelector('.ed');
+$('#boardMain').addEventListener('change',e=>{if(e.target.dataset.a==='st')upd(e.target.closest('.c').dataset.id,{status:e.target.value})});
+$('#boardMain').addEventListener('click',e=>{const a=e.target.dataset.a;if(a!=='next'&&a!=='note')return;const c=e.target.closest('.c'),r=items.get(c.dataset.id),ed=c.querySelector('.ed');
 ed.innerHTML=`<textarea>${esc(r[a])}</textarea><div class="row"><button class="p">Save</button><button>Cancel</button></div>`;const[s,x]=ed.querySelectorAll('button');ed.querySelector('textarea').focus();
 x.onclick=()=>ed.innerHTML='';s.onclick=()=>upd(r.id,{[a]:ed.querySelector('textarea').value.trim()||null})});
+
+/* ===== Office ===== */
+function dubaiStamp(){
+  try{return new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Dubai',year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date())+' Dubai'}
+  catch{return new Date().toISOString()}
+}
+
+function summarizeBots(){
+  const map=new Map();
+  for(const r of items.values()){
+    let b=map.get(r.bot);if(!b){b={bot:r.bot,slug:r.slug,color:botColor(r.bot),counts:{},latest:null,activeLatest:null,items:[]};map.set(r.bot,b)}
+    b.items.push(r);b.counts[r.status]=(b.counts[r.status]||0)+1;
+    if(!b.latest||r.updated_at>b.latest)b.latest=r.updated_at;
+    if(r.status!=='done'&&(!b.activeLatest||r.updated_at>b.activeLatest))b.activeLatest=r.updated_at;
+    if(r.slug)b.slug=r.slug;
+  }
+  for(const b of map.values()){
+    const c=b.counts;
+    if(c.blocked_max)b.room='needs';
+    else if(c.in_progress)b.room='desk';
+    else if(c.waiting||c.paused||c.blocked_other)b.room='lounge';
+    else b.room='idle';
+    const ref=b.activeLatest||b.latest;
+    b.stale=ref? (Date.now()-new Date(ref).getTime()>STALE_MS) : true;
+    b.blocked=b.items.filter(i=>i.status==='blocked_max').sort((a,c)=>c.updated_at.localeCompare(a.updated_at));
+    b.active=b.items.filter(i=>i.status!=='done').sort((a,c)=>c.updated_at.localeCompare(a.updated_at));
+  }
+  return [...map.values()].sort((a,b)=>a.bot.localeCompare(b.bot));
+}
+
+let scene,camera,renderer,controls,root,botMeshes=new Map(),raycaster,pointer,animId;
+
+function makeLabel(text,color='#e6e8ee'){
+  const c=document.createElement('canvas');c.width=512;c.height=128;const g=c.getContext('2d');
+  g.clearRect(0,0,512,128);g.fillStyle='rgba(0,0,0,0.45)';g.beginPath();g.roundRect(8,32,496,64,16);g.fill();
+  g.fillStyle=color;g.font='bold 36px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';
+  let t=text;if(g.measureText(t).width>460){while(t.length>3&&g.measureText(t+'…').width>460)t=t.slice(0,-1);t+='…'}
+  g.fillText(t,256,64);
+  const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
+  const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false});
+  const sp=new THREE.Sprite(mat);sp.scale.set(3.2,0.8,1);sp.center.set(0.5,0);return sp;
+}
+
+function makePerson(color,stale){
+  const g=new THREE.Group();
+  const body=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.75,0.35),new THREE.MeshStandardMaterial({color,roughness:0.85,metalness:0,transparent:stale,opacity:stale?0.35:1}));
+  body.position.y=0.55;g.add(body);
+  const head=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.4,0.4),new THREE.MeshStandardMaterial({color,roughness:0.8,transparent:stale,opacity:stale?0.35:1}));
+  head.position.y=1.15;g.add(head);
+  g.userData.body=body;g.userData.head=head;return g;
+}
+
+function addBox(parent,w,h,d,x,y,z,color,opacity=1){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color,roughness:0.9,metalness:0,transparent:opacity<1,opacity}));
+  m.position.set(x,y,z);m.receiveShadow=true;m.castShadow=true;parent.add(m);return m;
+}
+
+function buildRoom(){
+  root=new THREE.Group();scene.add(root);
+  // floor zones
+  addBox(root,28,0.12,22,0,0,0,'#2a3142');
+  // Needs Max glass office (corner)
+  addBox(root,8,0.08,7,-8.5,0.07,-6,'#3f1d1d');
+  addBox(root,8,2.4,0.12,-8.5,1.2,-9.5,'#94a3b8',0.25);
+  addBox(root,0.12,2.4,7,-12.5,1.2,-6,'#94a3b8',0.25);
+  addBox(root,8,2.4,0.12,-8.5,1.2,-2.5,'#94a3b8',0.18);
+  const needLbl=makeLabel('NEEDS MAX','#fca5a5');needLbl.position.set(-8.5,0.02,-6);needLbl.rotation.x=-Math.PI/2;needLbl.scale.set(5,1.2,1);root.add(needLbl);
+  // Desk floor
+  addBox(root,12,0.08,10,5,0.07,-4,'#1e293b');
+  const deskLbl=makeLabel('DESKS · WORKING','#93c5fd');deskLbl.position.set(5,0.02,-8.2);deskLbl.rotation.x=-Math.PI/2;deskLbl.scale.set(5.5,1.2,1);root.add(deskLbl);
+  // Lounge
+  addBox(root,10,0.08,8,-7,0.07,5.5,'#312e51');
+  const loungeLbl=makeLabel('LOUNGE · WAITING','#d8b4fe');loungeLbl.position.set(-7,0.02,2.4);loungeLbl.rotation.x=-Math.PI/2;loungeLbl.scale.set(5.5,1.2,1);root.add(loungeLbl);
+  // couches
+  addBox(root,2.4,0.45,0.9,-9.2,0.35,4.2,'#4c1d95');addBox(root,2.4,0.45,0.9,-5.5,0.35,4.2,'#4c1d95');
+  addBox(root,0.9,0.45,2.2,-4.2,0.35,6.5,'#5b21b6');
+  // Idle / break
+  addBox(root,10,0.08,8,6.5,0.07,5.5,'#1f2937');
+  const idleLbl=makeLabel('BREAK · IDLE','#cbd5e1');idleLbl.position.set(6.5,0.02,2.4);idleLbl.rotation.x=-Math.PI/2;idleLbl.scale.set(4.5,1.2,1);root.add(idleLbl);
+  // plants / racks
+  for(const[x,z] of [[-12.2,8.5],[11.5,8.5],[11.5,-9.2],[-1,8.8]]){
+    addBox(root,0.35,1.1,0.35,x,0.65,z,'#166534');addBox(root,0.7,0.25,0.7,x,1.3,z,'#22c55e');
+  }
+  addBox(root,1.2,1.8,0.6,11.2,1,-2,'#0f172a');
+  for(let i=0;i<4;i++)addBox(root,0.9,0.12,0.08,11.2,0.5+i*0.35,-1.72,i%2?'#22c55e':'#ef4444');
+}
+
+function deskSlots(n){
+  const slots=[];const cols=Math.ceil(Math.sqrt(n*1.4))||1;const rows=Math.ceil(n/cols)||1;
+  let i=0;for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){if(i>=n)break;slots.push({x:1.5+c*1.7,z:-7.2+r*1.6});i++}
+  return slots;
+}
+function loungeSlots(n){const s=[];for(let i=0;i<n;i++)s.push({x:-10.2+(i%5)*1.5,z:3.6+Math.floor(i/5)*1.5});return s}
+function needsSlots(n){const s=[];for(let i=0;i<n;i++)s.push({x:-11+(i%4)*1.5,z:-8.2+Math.floor(i/4)*1.5});return s}
+function idleSlots(n){const s=[];for(let i=0;i<n;i++)s.push({x:3.2+(i%5)*1.5,z:3.6+Math.floor(i/5)*1.5});return s}
+
+function ensureOffice(){
+  if(officeReady)return;
+  const host=$('#officeCanvas');
+  scene=new THREE.Scene();scene.background=new THREE.Color('#1a1d27');
+  camera=new THREE.PerspectiveCamera(45,1,0.1,200);camera.position.set(14,16,18);
+  renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.outputColorSpace=THREE.SRGBColorSpace;host.appendChild(renderer.domElement);
+  controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,0,0);controls.enableDamping=true;controls.maxPolarAngle=Math.PI*0.48;controls.minDistance=8;controls.maxDistance=40;
+  const hemi=new THREE.HemisphereLight(0xcbd5e1,0x1e293b,1.1);scene.add(hemi);
+  const dir=new THREE.DirectionalLight(0xffffff,0.85);dir.position.set(8,16,6);scene.add(dir);
+  buildRoom();
+  raycaster=new THREE.Raycaster();pointer=new THREE.Vector2();
+  renderer.domElement.addEventListener('pointerdown',onPointer);
+  window.addEventListener('resize',resizeOffice);resizeOffice();
+  officeReady=true;officeDirty=true;
+  (function loop(){animId=requestAnimationFrame(loop);controls.update();renderer.render(scene,camera)})();
+}
+
+function resizeOffice(){
+  if(!renderer)return;const host=$('#officeCanvas');const w=host.clientWidth||1,h=host.clientHeight||1;
+  camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);
+}
+
+function clearBots(){for(const m of botMeshes.values())root.remove(m);botMeshes.clear()}
+
+function syncOffice(){
+  if(!officeReady||!officeDirty)return;officeDirty=false;
+  const bots=summarizeBots();
+  clearBots();
+  const by={needs:[],desk:[],lounge:[],idle:[]};
+  for(const b of bots)by[b.room].push(b);
+  const place=(list,slots)=>{list.forEach((b,i)=>{const p=slots[i]||slots[slots.length-1]||{x:0,z:0};
+    // small desk for workers
+    if(b.room==='desk'){const desk=addBox(root,1.1,0.35,0.7,p.x,0.35,p.z-0.55,'#334155');botMeshes.set(b.bot+'__desk',desk)}
+    const person=makePerson(b.color,b.stale);person.position.set(p.x,0,p.z);person.userData.bot=b.bot;
+    const label=makeLabel(b.bot+(b.stale?' · stale':''), b.stale?'#94a3b8':'#e6e8ee');label.position.set(0,1.55,0);person.add(label);
+    // status ring
+    const ringCol=b.room==='needs'?0xef4444:b.room==='desk'?0x3b82f6:b.room==='lounge'?0xa855f7:0x9ca3af;
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(0.45,0.05,8,24),new THREE.MeshBasicMaterial({color:ringCol,transparent:true,opacity:b.stale?0.25:0.9}));
+    ring.rotation.x=Math.PI/2;ring.position.y=0.05;person.add(ring);
+    root.add(person);botMeshes.set(b.bot,person);
+  })};
+  place(by.needs,needsSlots(by.needs.length));
+  place(by.desk,deskSlots(Math.max(by.desk.length,1)));
+  place(by.lounge,loungeSlots(Math.max(by.lounge.length,1)));
+  place(by.idle,idleSlots(Math.max(by.idle.length,1)));
+  if(selectedBot)renderPanel(selectedBot);
+}
+
+function onPointer(ev){
+  if(!renderer)return;
+  const rect=renderer.domElement.getBoundingClientRect();
+  pointer.x=((ev.clientX-rect.left)/rect.width)*2-1;
+  pointer.y=-((ev.clientY-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera(pointer,camera);
+  const targets=[...botMeshes.values()].filter(m=>m.userData&&m.userData.bot);
+  const hits=raycaster.intersectObjects(targets,true);
+  if(!hits.length){selectedBot=null;$('#officePanel').classList.remove('open');$('#officePanel').innerHTML='';return}
+  let obj=hits[0].object;while(obj&&!(obj.userData&&obj.userData.bot))obj=obj.parent;
+  if(obj&&obj.userData.bot){selectedBot=obj.userData.bot;renderPanel(selectedBot)}
+}
+
+function renderPanel(botName){
+  const bots=summarizeBots();const b=bots.find(x=>x.bot===botName);
+  const panel=$('#officePanel');if(!b){panel.classList.remove('open');panel.innerHTML='';return}
+  panel.classList.add('open');
+  const roomLabel={needs:'Needs Max office',desk:'Working at desk',lounge:'Lounge (waiting)',idle:'Break / idle'}[b.room];
+  const list=(b.active.length?b.active:b.items.filter(i=>i.status==='done').slice(0,5));
+  panel.innerHTML=`<div class="row" style="justify-content:space-between"><h2>${esc(b.bot)}</h2><button id="opClose" type="button">Close</button></div>
+  <div class="sub">${esc(roomLabel)} · slug ${esc(b.slug||'—')} · updated ${b.latest?ago(b.latest)+' ago':'—'}${b.stale?' · <b>stale</b>':''}</div>
+  <div class="soft">Ack / Decline write a note the bot reads on its next turn. They are <b>not</b> Grok Bot approval cards and do not send mail, spend money, or unblock anything by themselves.</div>
+  ${list.map(r=>{
+    const col=ST.find(s=>s[0]===r.status)?.[2]||'#9ca3af';
+    const soft=r.status==='blocked_max'?`<div class="acts">
+      <button class="ok" data-soft="ack" data-id="${r.id}">Ack (note)</button>
+      <button class="danger" data-soft="decline" data-id="${r.id}">Decline (note)</button>
+    </div>`:'';
+    return`<div class="oc" style="--s:${col}"><div class="t">${esc(r.title)}</div>
+    <div class="m"><span class="tag">${esc(r.status)}</span>${r.area?`<span class="tag">${esc(r.area)}</span>`:''}<span class="ts">${ago(r.updated_at)} ago</span></div>
+    ${r.next?`<div class="n">${esc(r.next)}</div>`:''}${r.note?`<div class="note">📝 ${esc(r.note)}</div>`:''}${soft}</div>`}).join('')||'<p style="color:var(--mut)">No items.</p>'}`;
+  $('#opClose').onclick=()=>{selectedBot=null;panel.classList.remove('open');panel.innerHTML=''};
+}
+
+$('#officePanel').addEventListener('click',async e=>{
+  const btn=e.target.closest('[data-soft]');if(!btn)return;
+  const id=btn.dataset.id,kind=btn.dataset.soft,r=items.get(id);if(!r)return;
+  const stamp=dubaiStamp();
+  const line=kind==='ack'
+    ? `[Ack by Max ${stamp}] Soft acknowledgement only — bot should read this on its next turn.`
+    : `[Declined by Max ${stamp}] Soft decline note only — bot should read this on its next turn.`;
+  const note=r.note?`${r.note}\n${line}`:line;
+  const nextExtra=kind==='ack'
+    ? (r.next?`${r.next}\n[Max Ack ${stamp}]`:`[Max Ack ${stamp}] Soft ack noted in app`)
+    : (r.next?`${r.next}\n[Max Declined ${stamp}]`:`[Max Declined ${stamp}] Soft decline noted in app`);
+  btn.disabled=true;btn.textContent='Saving…';
+  await upd(id,{note,next:nextExtra});
+});
 </script></body></html>
