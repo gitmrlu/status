@@ -1,0 +1,24 @@
+{
+  "byId": {
+    "6c999119-6f75-4f59-a7f9-7d401548b8fb": {
+      "slug": "health",
+      "legs": "#1e3a5f",
+      "shoes": "#0f172a",
+      "label": "Health"
+    },
+    "6b2f763b-18ea-4aee-8d23-0d8be54fcaeb": {
+      "slug": "concierge",
+      "legs": "#1e293b",
+      "shoes": "#0f172a",
+      "label": "Concierge"
+    },
+    "e8e5e980-8fca-4db5-aa27-eb06d4f0f85c": {
+      "slug": "social-chair",
+      "legs": "#4b5563",
+      "shoes": "#1c1917",
+      "label": "Social Chair"
+    }
+  },
+  "source": "Meshy image-to-3d from each bot's avatar.png (Faceless Channel MESHY_API_KEY)",
+  "note": "Bust meshes; office attaches low-poly legs for walk cycle"
+}

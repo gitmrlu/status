@@ -134,14 +134,17 @@
       "colorName": "blue",
       "hex": "#1084FE",
       "shape": "squircle",
-      "source": "avatarColor"
+      "source": "avatarColor",
+      "portrait": "concierge",
+      "aliasOf": "Concierge"
     },
     "Health": {
       "id": "6c999119-6f75-4f59-a7f9-7d401548b8fb",
       "colorName": "red",
       "hex": "#FF263C",
       "shape": "squircle",
-      "source": "avatarColor"
+      "source": "avatarColor",
+      "portrait": "health"
     },
     "Jovia Marketing": {
       "id": "6e4b5f0c-57a9-4522-8d79-1ba78f076ef7",
@@ -261,7 +264,8 @@
       "hex": "#1084FE",
       "shape": "squircle",
       "source": "avatarColor",
-      "aliasOf": "Bookings"
+      "portrait": "concierge",
+      "aliasOf": "Concierge"
     },
     "operator": {
       "id": "e7968efc-1289-4fe8-a578-125a7fcecf44",
@@ -270,6 +274,31 @@
       "shape": "star",
       "source": "avatarColor",
       "aliasOf": "Operator"
+    },
+    "Concierge": {
+      "id": "6b2f763b-18ea-4aee-8d23-0d8be54fcaeb",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "squircle",
+      "source": "avatarColor",
+      "portrait": "concierge"
+    },
+    "Cocierge": {
+      "id": "6b2f763b-18ea-4aee-8d23-0d8be54fcaeb",
+      "colorName": "blue",
+      "hex": "#1084FE",
+      "shape": "squircle",
+      "source": "avatarColor",
+      "portrait": "concierge",
+      "aliasOf": "Concierge"
+    },
+    "Social Chair": {
+      "id": "e8e5e980-8fca-4db5-aa27-eb06d4f0f85c",
+      "colorName": "brown",
+      "hex": "#936439",
+      "shape": "sparkle",
+      "source": "avatarColor",
+      "portrait": "social-chair"
     }
   },
   "byId": {
@@ -455,5 +484,6 @@
       "shape": "squircle",
       "source": "avatarColor"
     }
-  }
+  },
+  "portraits": "app/avatars/*.glb via Meshy image-to-3d from agent avatar.png"
 }

@@ -113,6 +113,7 @@ button.ok{background:#22c55e;color:#fff;border-color:#22c55e}
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 
 const ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpbGpodHBvaHN0aGppYmN5aGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjE2MDQsImV4cCI6MjEwNzYzNzYwNH0.i2uZfVUBK97G-y29EbVq1SiOb78ur7oOXL_30CMJOxY';
 const sb=createClient('https://uiljhtpohsthjibcyher.supabase.co',ANON);
@@ -120,12 +121,12 @@ const ST=[['blocked_max','Blocked on Max','#f43f5e'],['blocked_other','Blocked (
 const STALE_MS=12*60*60*1000; // dim bots with no update in 12h
 const WORK_STALE_MS=10*60*1000; // working status goes stale after 10 minutes
 const FEED_QUIET_MS=45*60*1000; // warn only if no row updated in 45+ minutes
-const BOT_DEPTS={"byName":{"Grok Bot":{"dept":"Lead","zone":"lead","accessory":"crown","note":"HQ glass corner office"},"Grok Bot Bot":{"dept":"Ops","zone":"ops","accessory":"clipboard","note":"status dashboard"},"Operator":{"dept":"Ops","zone":"ops","accessory":"radio","note":"dispatch"},"1502":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell Upstay":{"dept":"Hospitality","zone":"hospitality","accessory":"luggage"},"Bookings":{"dept":"Travel","zone":"travel","accessory":"globe"},"Health":{"dept":"Health","zone":"health","accessory":"cross"},"Jovia Phil":{"dept":"Jovia","zone":"jovia","accessory":"heart"},"Jovia Health MGMT":{"dept":"Jovia","zone":"jovia","accessory":"cross"},"Jovia Health Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone"},"Jovia Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone"},"Wealth":{"dept":"Finance","zone":"finance","accessory":"coin"},"Todoist":{"dept":"Productivity","zone":"productivity","accessory":"checklist"},"Life Timeline":{"dept":"Personal","zone":"personal","accessory":"book"},"Privacy Opt-outs":{"dept":"Privacy","zone":"privacy","accessory":"shield"},"Restaurant Finder \u00b7 Dining":{"dept":"Dining","zone":"dining","accessory":"fork"},"Faceless Channel":{"dept":"Content","zone":"content","accessory":"camera"},"Browser Worker":{"dept":"Workers","zone":"workers","accessory":"wrench"},"Errands Worker":{"dept":"Workers","zone":"workers","accessory":"bag"},"Affiliate Marketing":{"dept":"Ventures","zone":"ventures","accessory":"chart"},"Dropshipping":{"dept":"Ventures","zone":"ventures","accessory":"box"},"Crypto Trader":{"dept":"Ventures","zone":"ventures","accessory":"coin"},"Digital Product":{"dept":"Ventures","zone":"ventures","accessory":"cube"},"Loyalty & Status":{"dept":"Ventures","zone":"ventures","accessory":"star"},"Notion":{"dept":"Productivity","zone":"productivity","accessory":"book"}},"zones":{"lead":{"label":"LEAD","color":"#e2e8f0","origin":[2.5,0,-6.8],"w":5.0,"d":4.2},"ops":{"label":"OPS","color":"#93c5fd","origin":[2.5,0,-6.5],"w":5.0,"d":4.2},"hospitality":{"label":"HOSPITALITY","color":"#67e8f9","origin":[8.2,0,-5.8],"w":5.5,"d":5.0},"travel":{"label":"TRAVEL","color":"#93c5fd","origin":[8.5,0,0.5],"w":5.0,"d":4.0},"health":{"label":"HEALTH","color":"#fda4af","origin":[-9.5,0,5.5],"w":5.0,"d":4.0},"jovia":{"label":"JOVIA","color":"#86efac","origin":[-3.5,0,5.8],"w":6.0,"d":4.5},"finance":{"label":"FINANCE","color":"#c4b5fd","origin":[3.5,0,5.8],"w":5.0,"d":4.0},"productivity":{"label":"PRODUCTIVITY","color":"#93c5fd","origin":[9.0,0,5.5],"w":5.0,"d":4.0},"personal":{"label":"PERSONAL","color":"#a5b4fc","origin":[-9.0,0,1.5],"w":4.5,"d":3.5},"privacy":{"label":"PRIVACY","color":"#7dd3fc","origin":[0.5,0,1.2],"w":4.0,"d":3.2},"dining":{"label":"DINING","color":"#fdba74","origin":[5.0,0,1.2],"w":4.0,"d":3.2},"content":{"label":"CONTENT","color":"#fdba74","origin":[-9.0,0,-2.0],"w":4.5,"d":3.8},"workers":{"label":"WORKERS","color":"#cbd5e1","origin":[8.5,0,-1.8],"w":4.5,"d":3.5},"ventures":{"label":"VENTURES","color":"#94a3b8","origin":[2.0,0,-2.2],"w":5.5,"d":3.8}}};
+const BOT_DEPTS={"byName":{"Grok Bot":{"dept":"Lead","zone":"lead","accessory":"crown","note":"HQ glass corner office"},"Grok Bot Bot":{"dept":"Ops","zone":"ops","accessory":"clipboard","note":"status dashboard"},"Operator":{"dept":"Ops","zone":"ops","accessory":"radio","note":"dispatch"},"1502":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell Upstay":{"dept":"Hospitality","zone":"hospitality","accessory":"luggage"},"Bookings":{"dept":"Travel","zone":"travel","accessory":"globe"},"Health":{"dept":"Health","zone":"health","accessory":"cross"},"Jovia Phil":{"dept":"Jovia","zone":"jovia","accessory":"heart"},"Jovia Health MGMT":{"dept":"Jovia","zone":"jovia","accessory":"cross"},"Jovia Health Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone"},"Jovia Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone"},"Wealth":{"dept":"Finance","zone":"finance","accessory":"coin"},"Todoist":{"dept":"Productivity","zone":"productivity","accessory":"checklist"},"Life Timeline":{"dept":"Personal","zone":"personal","accessory":"book"},"Privacy Opt-outs":{"dept":"Privacy","zone":"privacy","accessory":"shield"},"Restaurant Finder \u00b7 Dining":{"dept":"Dining","zone":"dining","accessory":"fork"},"Faceless Channel":{"dept":"Content","zone":"content","accessory":"camera"},"Browser Worker":{"dept":"Workers","zone":"workers","accessory":"wrench"},"Errands Worker":{"dept":"Workers","zone":"workers","accessory":"bag"},"Affiliate Marketing":{"dept":"Ventures","zone":"ventures","accessory":"chart"},"Dropshipping":{"dept":"Ventures","zone":"ventures","accessory":"box"},"Crypto Trader":{"dept":"Ventures","zone":"ventures","accessory":"coin"},"Digital Product":{"dept":"Ventures","zone":"ventures","accessory":"cube"},"Loyalty & Status":{"dept":"Ventures","zone":"ventures","accessory":"star"},"Notion":{"dept":"Productivity","zone":"productivity","accessory":"book"},"Concierge":{"dept":"Travel","zone":"travel","accessory":"globe","note":"travel + dining concierge"},"Cocierge":{"dept":"Travel","zone":"travel","accessory":"globe","note":"alias typo"},"Social Chair":{"dept":"Dining","zone":"dining","accessory":"fork","note":"social / dining"}},"zones":{"lead":{"label":"LEAD","color":"#e2e8f0","origin":[2.5,0,-6.8],"w":5.0,"d":4.2},"ops":{"label":"OPS","color":"#93c5fd","origin":[2.5,0,-6.5],"w":5.0,"d":4.2},"hospitality":{"label":"HOSPITALITY","color":"#67e8f9","origin":[8.2,0,-5.8],"w":5.5,"d":5.0},"travel":{"label":"TRAVEL","color":"#93c5fd","origin":[8.5,0,0.5],"w":5.0,"d":4.0},"health":{"label":"HEALTH","color":"#fda4af","origin":[-9.5,0,5.5],"w":5.0,"d":4.0},"jovia":{"label":"JOVIA","color":"#86efac","origin":[-3.5,0,5.8],"w":6.0,"d":4.5},"finance":{"label":"FINANCE","color":"#c4b5fd","origin":[3.5,0,5.8],"w":5.0,"d":4.0},"productivity":{"label":"PRODUCTIVITY","color":"#93c5fd","origin":[9.0,0,5.5],"w":5.0,"d":4.0},"personal":{"label":"PERSONAL","color":"#a5b4fc","origin":[-9.0,0,1.5],"w":4.5,"d":3.5},"privacy":{"label":"PRIVACY","color":"#7dd3fc","origin":[0.5,0,1.2],"w":4.0,"d":3.2},"dining":{"label":"DINING","color":"#fdba74","origin":[5.0,0,1.2],"w":4.0,"d":3.2},"content":{"label":"CONTENT","color":"#fdba74","origin":[-9.0,0,-2.0],"w":4.5,"d":3.8},"workers":{"label":"WORKERS","color":"#cbd5e1","origin":[8.5,0,-1.8],"w":4.5,"d":3.5},"ventures":{"label":"VENTURES","color":"#94a3b8","origin":[2.0,0,-2.2],"w":5.5,"d":3.8}}};
 const ROOM_COL={needs:0xf43f5e,lead:0xe2e8f0,desk:0x3b82f6,lounge:0xa855f7,idle:0x94a3b8};
 const $=s=>document.querySelector(s),esc=s=>(s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let items=new Map(),selectedBot=null,officeReady=false,simulating=false,simTimer=null,hoveredBot=null,researchScreens=[],summonedBot=null,maxPerson=null,maxDeskFront=null,maxStandPos=null;
 
-const BOT_AVATARS={"neutral":"#777777","palette":{"black":"#000000","brown":"#936439","red":"#FF263C","orange":"#FF6700","yellow":"#FF9800","green":"#00C972","cyan":"#00BCA6","blue":"#1084FE","violet":"#9159FE","magenta":"#FF309B","gray":"#777777"},"byName":{"Errands Worker":{"id":"096ca851-fb23-47c5-9817-d426569b2d59","hex":"#777777","shape":"pebble","colorName":"gray"},"Loyalty & Status":{"id":"0a1454ae-dfa6-446f-85c7-1ee602bfb9b5","hex":"#777777"},"1502":{"id":"13fb674f-e80e-4145-b9b9-d92ef92d09cf","hex":"#1084FE","shape":"pebble","colorName":"blue"},"Dropshipping":{"id":"2521d6fb-89c2-43a6-ae77-5854b37dce4b","hex":"#777777"},"Jovia Phil":{"id":"43e42232-ca49-4a20-9ff3-3901e743087a","hex":"#00C972","shape":"heart","colorName":"green"},"Digital Product":{"id":"5b24eabd-1baf-40f2-bada-1526b9375e14","hex":"#777777"},"Grok Bot Bot":{"id":"5c76b4bc-cba1-4c2b-aaa6-b5a76bdd59a3","hex":"#1084FE","shape":"blob","colorName":"blue"},"Jovia Health MGMT":{"id":"6398869e-b8cc-41e6-b272-f6aaaefb485c","hex":"#00C972","shape":"shield","colorName":"green"},"Bookings":{"id":"6b2f763b-18ea-4aee-8d23-0d8be54fcaeb","hex":"#1084FE","shape":"squircle","colorName":"blue"},"Health":{"id":"6c999119-6f75-4f59-a7f9-7d401548b8fb","hex":"#FF263C","shape":"squircle","colorName":"red"},"Jovia Marketing":{"id":"6e4b5f0c-57a9-4522-8d79-1ba78f076ef7","hex":"#00C972","shape":"hex","colorName":"green"},"1502 Haskell":{"id":"7e1e5696-ac0a-4007-bf3c-c0a2c1c02c0a","hex":"#00BCA6","shape":"tablet","colorName":"cyan"},"Affiliate Marketing":{"id":"8d304ba9-9abb-453e-b75c-ecf3f3efd5cb","hex":"#777777"},"1502 Haskell Upstay":{"id":"8d95711f-81f2-4000-8b78-c1fc68cdb6b7","hex":"#00BCA6","shape":"squircle","colorName":"cyan"},"Faceless Channel":{"id":"90495400-ce50-48eb-a839-f2eb0811ce78","hex":"#FF6700","shape":"squircle","colorName":"orange"},"Browser Worker":{"id":"91af2943-151e-4a0e-b3f4-a8ef1a40c680","hex":"#777777","shape":"pebble","colorName":"gray"},"Grok Bot":{"id":"b5449c50-3757-4e00-803e-6a440264108f","hex":"#000000","shape":"blob","colorName":"black"},"Crypto Trader":{"id":"cabd44ac-d33c-4f08-bd8f-23ced84cf58b","hex":"#777777"},"Todoist":{"id":"cbd139d8-45b1-4639-9555-d749d79d5d33","hex":"#1084FE","shape":"shield","colorName":"blue"},"Privacy Opt-outs":{"id":"d1698bbb-879a-4ef0-9930-eb39ac6ac728","hex":"#1084FE","shape":"squircle","colorName":"blue"},"Notion":{"id":"d810c3e4-a938-4b72-8ed7-2c7d91208f74","hex":"#3890e0"},"Life Timeline":{"id":"dcf1bffb-7b65-4c7b-ae91-fed432b1307f","hex":"#1084FE","shape":"squircle","colorName":"blue"},"Operator":{"id":"e7968efc-1289-4fe8-a578-125a7fcecf44","hex":"#000000","shape":"star","colorName":"black"},"Wealth":{"id":"ebbfcb18-21a5-4bc3-a845-301df745d084","hex":"#9159FE","shape":"blob","colorName":"violet"},"Jovia Health Marketing":{"id":"eeeecd8d-a606-4b71-bb16-1e361390ab39","hex":"#00C972","shape":"squircle","colorName":"green"},"Restaurant Finder \u00b7 Dining":{"id":"f86005ee-6b2e-4ce1-b0c7-841b06000753","hex":"#1084FE","shape":"squircle","colorName":"blue"},"Travel":{"id":"6b2f763b-18ea-4aee-8d23-0d8be54fcaeb","hex":"#1084FE","shape":"squircle","colorName":"blue"},"operator":{"id":"e7968efc-1289-4fe8-a578-125a7fcecf44","hex":"#000000","shape":"star","colorName":"black"}}};
+const BOT_AVATARS={"neutral":"#777777","palette":{"black":"#000000","brown":"#936439","red":"#FF263C","orange":"#FF6700","yellow":"#FF9800","green":"#00C972","cyan":"#00BCA6","blue":"#1084FE","violet":"#9159FE","magenta":"#FF309B","gray":"#777777"},"byName":{"Errands Worker":{"id":"096ca851-fb23-47c5-9817-d426569b2d59","hex":"#777777","shape":"pebble","colorName":"gray"},"Loyalty & Status":{"id":"0a1454ae-dfa6-446f-85c7-1ee602bfb9b5","hex":"#777777"},"1502":{"id":"13fb674f-e80e-4145-b9b9-d92ef92d09cf","hex":"#1084FE","shape":"pebble","colorName":"blue"},"Dropshipping":{"id":"2521d6fb-89c2-43a6-ae77-5854b37dce4b","hex":"#777777"},"Jovia Phil":{"id":"43e42232-ca49-4a20-9ff3-3901e743087a","hex":"#00C972","shape":"heart","colorName":"green"},"Digital Product":{"id":"5b24eabd-1baf-40f2-bada-1526b9375e14","hex":"#777777"},"Grok Bot Bot":{"id":"5c76b4bc-cba1-4c2b-aaa6-b5a76bdd59a3","hex":"#1084FE","shape":"blob","colorName":"blue"},"Jovia Health MGMT":{"id":"6398869e-b8cc-41e6-b272-f6aaaefb485c","hex":"#00C972","shape":"shield","colorName":"green"},"Bookings":{"id":"6b2f763b-18ea-4aee-8d23-0d8be54fcaeb","hex":"#1084FE","shape":"squircle","colorName":"blue","portrait":"concierge","aliasOf":"Concierge"},"Health":{"id":"6c999119-6f75-4f59-a7f9-7d401548b8fb","hex":"#FF263C","shape":"squircle","colorName":"red","portrait":"health"},"Jovia Marketing":{"id":"6e4b5f0c-57a9-4522-8d79-1ba78f076ef7","hex":"#00C972","shape":"hex","colorName":"green"},"1502 Haskell":{"id":"7e1e5696-ac0a-4007-bf3c-c0a2c1c02c0a","hex":"#00BCA6","shape":"tablet","colorName":"cyan"},"Affiliate Marketing":{"id":"8d304ba9-9abb-453e-b75c-ecf3f3efd5cb","hex":"#777777"},"1502 Haskell Upstay":{"id":"8d95711f-81f2-4000-8b78-c1fc68cdb6b7","hex":"#00BCA6","shape":"squircle","colorName":"cyan"},"Faceless Channel":{"id":"90495400-ce50-48eb-a839-f2eb0811ce78","hex":"#FF6700","shape":"squircle","colorName":"orange"},"Browser Worker":{"id":"91af2943-151e-4a0e-b3f4-a8ef1a40c680","hex":"#777777","shape":"pebble","colorName":"gray"},"Grok Bot":{"id":"b5449c50-3757-4e00-803e-6a440264108f","hex":"#000000","shape":"blob","colorName":"black"},"Crypto Trader":{"id":"cabd44ac-d33c-4f08-bd8f-23ced84cf58b","hex":"#777777"},"Todoist":{"id":"cbd139d8-45b1-4639-9555-d749d79d5d33","hex":"#1084FE","shape":"shield","colorName":"blue"},"Privacy Opt-outs":{"id":"d1698bbb-879a-4ef0-9930-eb39ac6ac728","hex":"#1084FE","shape":"squircle","colorName":"blue"},"Notion":{"id":"d810c3e4-a938-4b72-8ed7-2c7d91208f74","hex":"#3890e0"},"Life Timeline":{"id":"dcf1bffb-7b65-4c7b-ae91-fed432b1307f","hex":"#1084FE","shape":"squircle","colorName":"blue"},"Operator":{"id":"e7968efc-1289-4fe8-a578-125a7fcecf44","hex":"#000000","shape":"star","colorName":"black"},"Wealth":{"id":"ebbfcb18-21a5-4bc3-a845-301df745d084","hex":"#9159FE","shape":"blob","colorName":"violet"},"Jovia Health Marketing":{"id":"eeeecd8d-a606-4b71-bb16-1e361390ab39","hex":"#00C972","shape":"squircle","colorName":"green"},"Restaurant Finder \u00b7 Dining":{"id":"f86005ee-6b2e-4ce1-b0c7-841b06000753","hex":"#1084FE","shape":"squircle","colorName":"blue"},"Travel":{"id":"6b2f763b-18ea-4aee-8d23-0d8be54fcaeb","hex":"#1084FE","shape":"squircle","colorName":"blue","portrait":"concierge","aliasOf":"Concierge"},"operator":{"id":"e7968efc-1289-4fe8-a578-125a7fcecf44","hex":"#000000","shape":"star","colorName":"black","aliasOf":"Operator"},"Concierge":{"id":"6b2f763b-18ea-4aee-8d23-0d8be54fcaeb","hex":"#1084FE","shape":"squircle","colorName":"blue","portrait":"concierge"},"Cocierge":{"id":"6b2f763b-18ea-4aee-8d23-0d8be54fcaeb","hex":"#1084FE","shape":"squircle","colorName":"blue","portrait":"concierge","aliasOf":"Concierge"},"Social Chair":{"id":"e8e5e980-8fca-4db5-aa27-eb06d4f0f85c","hex":"#936439","shape":"sparkle","colorName":"brown","portrait":"social-chair"}}};
 function botAvatar(name){
   const hit=BOT_AVATARS.byName&&BOT_AVATARS.byName[name];
   if(hit)return hit;
@@ -139,6 +140,78 @@ function botAvatar(name){
 function botColor(name){return botAvatar(name).hex}
 function botShape(name){return botAvatar(name).shape||'blob'}
 function botId(name){const a=botAvatar(name);return (a&&a.id)||null}
+function botPortrait(name){
+  const a=botAvatar(name);
+  if(a&&a.portrait)return a.portrait;
+  const id=a&&a.id;
+  return (id&&PORTRAIT_BY_ID[id]&&PORTRAIT_BY_ID[id].slug)||null;
+}
+const PORTRAIT_BY_ID={
+  "6c999119-6f75-4f59-a7f9-7d401548b8fb":{slug:"health",legs:0x1e3a5f,shoes:0x0f172a},
+  "6b2f763b-18ea-4aee-8d23-0d8be54fcaeb":{slug:"concierge",legs:0x1e293b,shoes:0x0f172a},
+  "e8e5e980-8fca-4db5-aa27-eb06d4f0f85c":{slug:"social-chair",legs:0x4b5563,shoes:0x1c1917}
+};
+const gltfLoader=new GLTFLoader();
+const portraitMeshCache=new Map();
+function loadPortraitMesh(slug){
+  if(portraitMeshCache.has(slug))return portraitMeshCache.get(slug);
+  const url=new URL('avatars/'+slug+'.glb', window.location.href).href;
+  const p=gltfLoader.loadAsync(url).then(gltf=>{
+    const model=gltf.scene||gltf.scenes[0];
+    model.traverse(o=>{
+      if(o.isMesh){
+        o.castShadow=false;o.receiveShadow=false;
+        if(o.material){
+          const mats=Array.isArray(o.material)?o.material:[o.material];
+          for(const m of mats){ if('roughness' in m)m.roughness=0.72; if('metalness' in m)m.metalness=0.05; }
+        }
+      }
+    });
+    return model;
+  }).catch(err=>{ console.warn('portrait load failed', slug, err); portraitMeshCache.delete(slug); return null; });
+  portraitMeshCache.set(slug,p);
+  return p;
+}
+function fitBustOnBody(bust, body){
+  const box=new THREE.Box3().setFromObject(bust);
+  const size=box.getSize(new THREE.Vector3());
+  if(size.y<1e-3)return;
+  bust.scale.setScalar(0.95/size.y);
+  bust.updateMatrixWorld(true);
+  const box2=new THREE.Box3().setFromObject(bust);
+  const c=box2.getCenter(new THREE.Vector3());
+  bust.position.set(-c.x, -0.16 - box2.min.y, -c.z);
+  body.add(bust);
+}
+function makePortraitActor(color, portraitMeta, accessory='clipboard'){
+  const col=typeof color==='string'?actorHex(color):(color||0x777777);
+  const g=new THREE.Group();
+  const body=new THREE.Group(); body.position.y=0.62; g.add(body);
+  const head=new THREE.Group(); head.position.y=1.18; g.add(head);
+  const waist=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.18,0.26), new THREE.MeshStandardMaterial({color:portraitMeta.legs,roughness:0.9,metalness:0}));
+  waist.position.y=-0.22; body.add(waist);
+  const legMat=new THREE.MeshStandardMaterial({color:portraitMeta.legs,roughness:0.9,metalness:0});
+  const shoeMat=new THREE.MeshStandardMaterial({color:portraitMeta.shoes,roughness:0.85,metalness:0});
+  const legL=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.36,0.16),legMat);legL.position.set(-0.12,0.18,0);g.add(legL);
+  const legR=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.36,0.16),legMat.clone());legR.position.set(0.12,0.18,0);g.add(legR);
+  const shoeL=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.07,0.22),shoeMat);shoeL.position.set(-0.12,0.045,0.02);g.add(shoeL);
+  const shoeR=shoeL.clone();shoeR.position.x=0.13;g.add(shoeR);
+  const armMat=new THREE.MeshStandardMaterial({color:col,roughness:0.9,metalness:0,transparent:true,opacity:0.0});
+  const armL=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.36,0.1),armMat);armL.position.set(-0.32,0.7,0);g.add(armL);
+  const armR=armL.clone();armR.position.x=0.32;g.add(armR);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(0.42,0.045,8,24),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:0.7,roughness:0.55,metalness:0}));
+  ring.rotation.x=Math.PI/2;ring.position.y=0.04;g.add(ring);
+  g.userData.body=body;g.userData.head=head;g.userData.ring=ring;g.userData.shape='portrait';
+  g.userData.legL=legL;g.userData.legR=legR;g.userData.armL=armL;g.userData.armR=armR;g.userData.acc=null;
+  g.userData.portrait=portraitMeta.slug;
+  loadPortraitMesh(portraitMeta.slug).then(model=>{
+    if(!model)return;
+    const bust=model.clone(true);
+    fitBustOnBody(bust, body);
+    g.userData.bust=bust;
+  });
+  return g;
+}
 function hexToNum(h){
   const s=String(h||'').replace('#','');
   if(s.length!==6)return 0x777777;
@@ -202,7 +275,7 @@ function softResolveLabel(r){
   return null;
 }
 // Merge phantom / alias bot names — never spawn a desk for a non-existent bot
-const BOT_CANON={'Travel':'Bookings','travel':'Bookings','operator':'Operator'};
+const BOT_CANON={'Travel':'Concierge','travel':'Concierge','Bookings':'Concierge','Cocierge':'Concierge','cocierge':'Concierge','operator':'Operator'};
 function canonBot(name){
   if(!name)return name;
   if(BOT_CANON[name])return BOT_CANON[name];
@@ -703,6 +776,7 @@ function headGeo(shape){
     case 'heart': return new THREE.SphereGeometry(0.24,10,8);
     case 'pebble': return new THREE.SphereGeometry(0.24,12,10);
     case 'squircle': return new THREE.BoxGeometry(0.36,0.36,0.36);
+    case 'sparkle': return new THREE.OctahedronGeometry(0.24,0);
     case 'blob':
     default: return new THREE.SphereGeometry(0.26,14,12);
   }
@@ -822,21 +896,23 @@ function applyBots(instant){
       let a=actors.get(b.bot);
       const target=slotFor(room,i,list.length,b);
       if(!a){
-        const group=makeActor(b.color,b.shape||'blob',b.accessory||'clipboard');
+        const pid=botId(b.bot); const pmeta=pid&&PORTRAIT_BY_ID[pid];
+        const group=pmeta?makePortraitActor(b.color,pmeta,b.accessory||'clipboard'):makeActor(b.color,b.shape||'blob',b.accessory||'clipboard');
         group.userData.bot=b.bot;
         const label=makeLabel(b.bot,'#94a3b8',1);label.position.set(0,1.62,0);group.add(label);group.userData.label=label;
         group.position.copy(instant?target:new THREE.Vector3(0,0,8));
         root.add(group);
-        a={group,target:target.clone(),homeTarget:target.clone(),summoned:false,wiggleUntil:0,room,color:b.color,shape:b.shape,stale:b.stale,bob:Math.random()*Math.PI*2,walk:0};
+        a={group,target:target.clone(),homeTarget:target.clone(),summoned:false,wiggleUntil:0,room,color:b.color,shape:b.shape,portrait:pmeta?pmeta.slug:null,stale:b.stale,bob:Math.random()*Math.PI*2,walk:0};
         actors.set(b.bot,a);
-      }else if(a.shape!==b.shape || a.color!==b.color){
+      }else if(a.shape!==b.shape || a.color!==b.color || a.portrait!==((()=>{const id=botId(b.bot);return (id&&PORTRAIT_BY_ID[id]&&PORTRAIT_BY_ID[id].slug)||null})())){
         // rebuild mesh when avatar map finishes loading
         const pos=a.group.position.clone();const rot=a.group.rotation.y;
         root.remove(a.group);
-        const group=makeActor(b.color,b.shape||'blob',b.accessory||'clipboard');group.userData.bot=b.bot;
+        const pmeta2=((id)=>{return id&&PORTRAIT_BY_ID[id]})(botId(b.bot));
+        const group=pmeta2?makePortraitActor(b.color,pmeta2,b.accessory||'clipboard'):makeActor(b.color,b.shape||'blob',b.accessory||'clipboard');group.userData.bot=b.bot;
         const label=makeLabel(b.bot+(b.stale?' · stale':''),'#94a3b8',1);
         label.position.set(0,1.62,0);group.add(label);group.userData.label=label;
-        group.position.copy(pos);group.rotation.y=rot;root.add(group);a.group=group;a.shape=b.shape;a.color=b.color;
+        group.position.copy(pos);group.rotation.y=rot;root.add(group);a.group=group;a.shape=b.shape;a.color=b.color;a.portrait=pmeta2?pmeta2.slug:null;
       }
       a.homeTarget=a.homeTarget||target.clone();a.homeTarget.copy(target);
       a.room=room;a.stale=b.stale;a.color=b.color;a.shape=b.shape;
@@ -1076,8 +1152,8 @@ function animateActors(dt,t){
       const swing=Math.sin(t*12)*0.55;
       if(ud.legL){ud.legL.rotation.x=swing;ud.legR.rotation.x=-swing}
       if(ud.armL){ud.armL.rotation.x=-swing*0.7;ud.armR.rotation.x=swing*0.7}
-      ud.body.position.y=0.62+Math.abs(Math.sin(t*12))*0.04;
-      ud.head.position.y=1.18+Math.abs(Math.sin(t*12))*0.02;
+      if(ud.body)ud.body.position.y=0.62+Math.abs(Math.sin(t*12))*0.04;
+      if(ud.head)ud.head.position.y=1.18+Math.abs(Math.sin(t*12))*0.02;
       a.walk=1;
     }else{
       g.position.x=a.target.x;g.position.z=a.target.z;
@@ -1085,22 +1161,22 @@ function animateActors(dt,t){
       if(ud.armL){ud.armL.rotation.x=0;ud.armR.rotation.x=0}
       if(a.summoned&&maxStandPos){
         g.rotation.y=Math.atan2(maxStandPos.x-g.position.x, maxStandPos.z-g.position.z);
-        ud.body.position.y=0.62;ud.head.position.y=1.18;
+        if(ud.body)ud.body.position.y=0.62;if(ud.head)ud.head.position.y=1.18;
         ud.ring.material.emissiveIntensity=1.0+Math.sin(t*3)*0.25;
       }else if(a.room==='idle'||a.room==='lounge'){
         // Idle / lounge / break: NO bob — tags stay pinned
-        ud.body.position.y=0.62;ud.head.position.y=1.18;
+        if(ud.body)ud.body.position.y=0.62;if(ud.head)ud.head.position.y=1.18;
         ud.ring.material.emissiveIntensity=a.stale?0.1:0.45;
       }else if(a.room==='desk'||a.room==='lead'){
-        ud.body.position.y=0.62+Math.sin(t*5+a.bob)*0.02;
-        ud.head.position.y=1.18+Math.sin(t*5+a.bob)*0.015;
+        if(ud.body)ud.body.position.y=0.62+Math.sin(t*5+a.bob)*0.02;
+        if(ud.head)ud.head.position.y=1.18+Math.sin(t*5+a.bob)*0.015;
         g.rotation.y=a.room==='lead'?Math.PI*0.2:Math.PI;
         ud.ring.material.emissiveIntensity=0.85+Math.sin(t*4)*0.2;
       }else if(a.room==='needs'){
-        ud.body.position.y=0.62;ud.head.position.y=1.18;
+        if(ud.body)ud.body.position.y=0.62;if(ud.head)ud.head.position.y=1.18;
         ud.ring.material.emissiveIntensity=0.75+Math.sin(t*3.5)*0.35;
       }else{
-        ud.body.position.y=0.62;ud.head.position.y=1.18;
+        if(ud.body)ud.body.position.y=0.62;if(ud.head)ud.head.position.y=1.18;
       }
       a.walk=0;
     }
@@ -1129,7 +1205,7 @@ document.querySelectorAll('.tod button').forEach(b=>b.onclick=()=>setTod(b.datas
 
 window.__summonBot=(name)=>{summonToMax(name);selectedBot=name;renderPanel(name)};
 window.__dismissSummon=()=>dismissSummon();
-window.__officeProbe=()=>{const a=summonedBot&&actors.get(summonedBot);const dist=a&&a.target?Math.hypot(a.target.x-a.group.position.x,a.target.z-a.group.position.z):null;let labelsTotal=0,labelsVisible=0;for(const act of actors.values()){const lab=act.group.userData.label;if(!lab)continue;labelsTotal++;if(lab.visible)labelsVisible++}return{actorCount:actors.size,names:[...actors.keys()],maxOk:!!maxPerson&&!!maxDeskFront,summoned:summonedBot,wiggling:!!(a&&a.wiggleUntil&&performance.now()<a.wiggleUntil),dist,desk:maxDeskFront?{x:maxDeskFront.x,z:maxDeskFront.z}:null,botIdSample:botId('Grok Bot Bot'),panelLink:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('href')||null,panelTarget:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('target')||null,panelRel:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('rel')||null,needsCount:summarizeBots().filter(b=>b.room==='needs').length,labelsTotal,labelsVisible};};
+window.__officeProbe=()=>{const a=summonedBot&&actors.get(summonedBot);const dist=a&&a.target?Math.hypot(a.target.x-a.group.position.x,a.target.z-a.group.position.z):null;let labelsTotal=0,labelsVisible=0;for(const act of actors.values()){const lab=act.group.userData.label;if(!lab)continue;labelsTotal++;if(lab.visible)labelsVisible++}return{actorCount:actors.size,names:[...actors.keys()],maxOk:!!maxPerson&&!!maxDeskFront,summoned:summonedBot,wiggling:!!(a&&a.wiggleUntil&&performance.now()<a.wiggleUntil),dist,desk:maxDeskFront?{x:maxDeskFront.x,z:maxDeskFront.z}:null,botIdSample:botId('Grok Bot Bot'),portraitCount:[...actors.values()].filter(x=>x.portrait).length,portraitNames:[...actors.values()].filter(x=>x.portrait).map(x=>x.group.userData.bot),panelLink:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('href')||null,panelTarget:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('target')||null,panelRel:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('rel')||null,needsCount:summarizeBots().filter(b=>b.room==='needs').length,labelsTotal,labelsVisible};};
 window.__aimMaxDesk=()=>{if(!controls||!maxStandPos)return;controls.target.set(maxStandPos.x,0.7,maxStandPos.z);camera.position.set(maxStandPos.x-6.5,7.2,maxStandPos.z-5.8);controls.update()};
 window.__aimMaxCorner=()=>{if(!controls||!maxStandPos)return;controls.target.set(maxStandPos.x-0.2,0.95,maxStandPos.z+0.15);camera.position.set(maxStandPos.x-5.2,5.6,maxStandPos.z+3.4);controls.update()};
 window.__resetCam=()=>{if(!controls||!camera)return;camera.position.set(-18.5,12.2,-16.5);controls.target.set(-5.2,0.4,-4.0);controls.update()};

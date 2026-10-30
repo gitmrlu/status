@@ -288,6 +288,24 @@
       "dept": "Productivity",
       "zone": "productivity",
       "accessory": "book"
+    },
+    "Concierge": {
+      "dept": "Travel",
+      "zone": "travel",
+      "accessory": "globe",
+      "note": "travel + dining concierge"
+    },
+    "Cocierge": {
+      "dept": "Travel",
+      "zone": "travel",
+      "accessory": "globe",
+      "note": "alias typo"
+    },
+    "Social Chair": {
+      "dept": "Dining",
+      "zone": "dining",
+      "accessory": "fork",
+      "note": "social / dining"
     }
   },
   "rooms": {
