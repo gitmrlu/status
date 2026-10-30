@@ -24,8 +24,13 @@ button.ok{background:#22c55e;color:#fff;border-color:#22c55e}
 .hud{background:rgba(24,27,36,.88);color:#e6e8ee;border:1px solid #2a2f3c;border-radius:10px;padding:10px 12px;font-size:12px}
 .hud h3{margin:0 0 6px;font-size:13px}.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 #usageHud{border-color:#38bdf855}
-#usageHud .ubar{height:8px;background:#1e293b;border-radius:99px;overflow:hidden;margin:6px 0}
+#usageHud .ubar{position:relative;height:8px;background:#1e293b;border-radius:99px;overflow:visible;margin:6px 0}
 #usageHud .ubar>i{display:block;height:100%;background:linear-gradient(90deg,#38bdf8,#22c55e);border-radius:99px}
+#usageHud .ubar>b{position:absolute;top:-3px;bottom:-3px;width:2px;background:#e2e8f0;transform:translateX(-50%);border-radius:1px;box-shadow:0 0 0 1px #0b0d12;pointer-events:none}
+#usageHud .ubar.pace-under>i{background:linear-gradient(90deg,#16a34a,#4ade80)}
+#usageHud .ubar.pace-over>i{background:linear-gradient(90deg,#d97706,#fbbf24)}
+#usageHud .ubar.pace-critical>i{background:linear-gradient(90deg,#dc2626,#f87171)}
+#usageHud .pace{color:#cbd5e1;font-size:11px;margin-top:2px;line-height:1.35}
 #usageHud .muted{color:#94a3b8;font-size:11px}
 #usageHud .big{font-size:18px;font-weight:700;letter-spacing:-0.02em}
 .leg{display:flex;align-items:center;gap:4px}.dot{width:8px;height:8px;border-radius:50%}
@@ -659,6 +664,30 @@ function fmtCountdown(iso){
   if(h>0)return h+'h '+m+'m left';
   return m+'m left';
 }
+/** Week window from last Friday 12:21 Dubai reset → next (weekly_resets). Client-side only. */
+function weekElapsedPct(weeklyResetsIso){
+  const next=new Date(weeklyResetsIso).getTime();
+  if(!Number.isFinite(next))return null;
+  const WEEK_MS=7*864e5;
+  const last=next-WEEK_MS;
+  const pct=((Date.now()-last)/WEEK_MS)*100;
+  return Math.max(0,Math.min(100,pct));
+}
+function usagePace(usedPct, elapsedPct){
+  if(elapsedPct==null||!Number.isFinite(usedPct)||!Number.isFinite(elapsedPct))return {tone:'under',label:'',elapsed:null};
+  const e=Math.round(elapsedPct);
+  if(usedPct<=elapsedPct){
+    const well=usedPct<elapsedPct*0.6||(elapsedPct-usedPct)>=8;
+    return {tone:'under', label:well?'well under pace':'under pace', elapsed:e};
+  }
+  const well=usedPct>elapsedPct*1.35||(usedPct-elapsedPct)>=12;
+  return {tone:well?'critical':'over', label:well?'well over pace':'over pace', elapsed:e};
+}
+function fmtUsed(n){
+  if(!Number.isFinite(n))return '0';
+  const r=Math.round(n*10)/10;
+  return (r%1?r.toFixed(1):String(r));
+}
 function paintUsageCanvas(j){
   const c=document.createElement('canvas');c.width=768;c.height=512;const g=c.getContext('2d');
   g.fillStyle='#0b1220';g.fillRect(0,0,768,512);
@@ -668,18 +697,28 @@ function paintUsageCanvas(j){
     g.fillStyle='#94a3b8';g.font='28px system-ui,sans-serif';g.fillText('No reading yet',36,160);
     return c;
   }
-  const left=Math.max(0,Math.min(100,100-j.weekly_used_pct));
-  g.fillStyle='#e2e8f0';g.font='bold 72px system-ui,sans-serif';g.fillText(left.toFixed(left%1?1:0)+'% left',36,150);
-  // bar
-  g.fillStyle='#1e293b';g.fillRect(36,180,696,28);
-  const bw=696*(left/100);
-  const grd=g.createLinearGradient(36,0,36+bw,0);grd.addColorStop(0,'#38bdf8');grd.addColorStop(1,'#22c55e');
-  g.fillStyle=grd;g.fillRect(36,180,bw,28);
+  const used=Math.max(0,Math.min(100,j.weekly_used_pct));
+  const left=Math.max(0,Math.min(100,100-used));
+  const elapsed=weekElapsedPct(j.weekly_resets);
+  const pace=usagePace(used, elapsed);
+  g.fillStyle='#e2e8f0';g.font='bold 64px system-ui,sans-serif';g.fillText(left.toFixed(left%1?1:0)+'% left',36,140);
+  // usage bar + week-elapsed marker
+  g.fillStyle='#1e293b';g.fillRect(36,168,696,28);
+  const bw=696*(used/100);
+  const barCols=pace.tone==='critical'?['#dc2626','#f87171']:pace.tone==='over'?['#d97706','#fbbf24']:['#16a34a','#4ade80'];
+  const grd=g.createLinearGradient(36,0,36+Math.max(bw,1),0);grd.addColorStop(0,barCols[0]);grd.addColorStop(1,barCols[1]);
+  g.fillStyle=grd;g.fillRect(36,168,bw,28);
+  if(elapsed!=null){
+    const mx=36+696*(elapsed/100);
+    g.fillStyle='#e2e8f0';g.fillRect(mx-1.5,162,3,40);
+  }
+  const paceLine='Used '+fmtUsed(used)+'% · '+(elapsed==null?'—':Math.round(elapsed))+'% of week elapsed'+(pace.label?(' · '+pace.label):'');
+  g.fillStyle='#cbd5e1';g.font='22px system-ui,sans-serif';g.fillText(paceLine,36,230);
   const resetLbl=fmtDubai(j.weekly_resets,{withWeekday:true});
   g.fillStyle='#bae6fd';g.font='26px system-ui,sans-serif';
-  g.fillText(resetLbl?('resets '+resetLbl):'resets —',36,250);
+  g.fillText(resetLbl?('resets '+resetLbl):'resets —',36,270);
   g.fillStyle='#94a3b8';g.font='22px system-ui,sans-serif';
-  g.fillText(fmtCountdown(j.weekly_resets),36,286);
+  g.fillText(fmtCountdown(j.weekly_resets),36,306);
   const odU=Number(j.ondemand_used), odL=Number(j.ondemand_limit);
   g.fillStyle='#e2e8f0';g.font='bold 28px system-ui,sans-serif';
   g.fillText('On-demand  $'+(Number.isFinite(odU)?odU:0)+' / $'+(Number.isFinite(odL)?odL:0),36,360);
@@ -713,12 +752,18 @@ function updateUsageBoard(){
   if(body){
     if(!j){body.innerHTML='<span class="muted">No reading yet</span>';}
     else{
-      const left=Math.max(0,Math.min(100,100-j.weekly_used_pct));
+      const used=Math.max(0,Math.min(100,j.weekly_used_pct));
+      const left=Math.max(0,Math.min(100,100-used));
+      const elapsed=weekElapsedPct(j.weekly_resets);
+      const pace=usagePace(used, elapsed);
       const resetLbl=fmtDubai(j.weekly_resets,{withWeekday:true})||'—';
       const odU=Number(j.ondemand_used), odL=Number(j.ondemand_limit);
       const asof=fmtDubai(j.as_of)||'—';
+      const elMarker=elapsed==null?'':`<b style="left:${elapsed}%"></b>`;
+      const paceTxt=`Used ${fmtUsed(used)}% · ${elapsed==null?'—':Math.round(elapsed)}% of week elapsed${pace.label?(' · '+pace.label):''}`;
       body.innerHTML=`<div class="big">${left.toFixed(left%1?1:0)}% left</div>
-        <div class="ubar"><i style="width:${left}%"></i></div>
+        <div class="ubar pace-${pace.tone}"><i style="width:${used}%"></i>${elMarker}</div>
+        <div class="pace">${esc(paceTxt)}</div>
         <div>resets ${esc(resetLbl)}</div>
         <div class="muted">${esc(fmtCountdown(j.weekly_resets))}</div>
         <div style="margin-top:6px">On-demand $${Number.isFinite(odU)?odU:0} / $${Number.isFinite(odL)?odL:0}</div>
@@ -926,11 +971,18 @@ function applyBots(instant){
       a.group.userData.ring.material.emissive.setHex(ringCol);
       a.group.userData.ring.material.emissiveIntensity=b.stale?0.15:1.1;
       const bodyCol=actorHex(b.color);
-      a.group.userData.body.material.color.setHex(bodyCol);
-      a.group.userData.head.material.color.setHex(bodyCol);
       const op=b.stale?0.35:1;
-      a.group.userData.body.material.opacity=op;a.group.userData.body.material.transparent=b.stale;
-      a.group.userData.head.material.opacity=op;a.group.userData.head.material.transparent=b.stale;
+      // Portrait actors use Groups for body/head (GLB bust); only mesh materials get tinted
+      const bm=a.group.userData.body, hm=a.group.userData.head;
+      if(bm&&bm.material){bm.material.color.setHex(bodyCol);bm.material.opacity=op;bm.material.transparent=!!b.stale}
+      if(hm&&hm.material){hm.material.color.setHex(bodyCol);hm.material.opacity=op;hm.material.transparent=!!b.stale}
+      if(a.portrait&&a.group.userData.bust){
+        a.group.userData.bust.traverse(o=>{
+          if(!o.isMesh||!o.material)return;
+          const mats=Array.isArray(o.material)?o.material:[o.material];
+          for(const m of mats){m.transparent=!!b.stale;m.opacity=op}
+        });
+      }
       // refresh label — every bot name visible; stacking/leaders in updateLabelVisibility
       const old=a.group.userData.label;a.group.remove(old);if(old.material.map)old.material.map.dispose();old.material.dispose();
       if(a.group.userData.leader){a.group.remove(a.group.userData.leader);a.group.userData.leader.geometry?.dispose?.();a.group.userData.leader=null}
