@@ -119,6 +119,9 @@ import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
+import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
+import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 
 const ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpbGpodHBvaHN0aGppYmN5aGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNjE2MDQsImV4cCI6MjEwNzYzNzYwNH0.i2uZfVUBK97G-y29EbVq1SiOb78ur7oOXL_30CMJOxY';
 const sb=createClient('https://uiljhtpohsthjibcyher.supabase.co',ANON);
@@ -129,7 +132,7 @@ const FEED_QUIET_MS=45*60*1000; // warn only if no row updated in 45+ minutes
 const BOT_DEPTS={"byName":{"Grok Bot":{"dept":"Lead","zone":"lead","accessory":"crown","note":"HQ glass corner office"},"Grok Bot Bot":{"dept":"Ops","zone":"ops","accessory":"clipboard","note":"status dashboard"},"Operator":{"dept":"Ops","zone":"ops","accessory":"radio","note":"dispatch"},"1502":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell":{"dept":"Hospitality","zone":"hospitality","accessory":"keycard"},"1502 Haskell Upstay":{"dept":"Hospitality","zone":"hospitality","accessory":"luggage"},"Bookings":{"dept":"Travel","zone":"travel","accessory":"globe"},"Health":{"dept":"Health","zone":"health","accessory":"cross"},"Jovia Phil":{"dept":"Jovia","zone":"jovia","accessory":"heart"},"Jovia Health MGMT":{"dept":"Jovia","zone":"jovia","accessory":"cross"},"Jovia Health Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone"},"Jovia Marketing":{"dept":"Jovia","zone":"jovia","accessory":"megaphone","note":"alias"},"Wealth":{"dept":"Finance","zone":"finance","accessory":"coin"},"Todoist":{"dept":"Productivity","zone":"productivity","accessory":"checklist"},"Life Timeline":{"dept":"Personal","zone":"personal","accessory":"book"},"Privacy Opt-outs":{"dept":"Privacy","zone":"privacy","accessory":"shield"},"Restaurant Finder \u00b7 Dining":{"dept":"Dining","zone":"dining","accessory":"fork"},"Faceless Channel":{"dept":"Content","zone":"content","accessory":"camera"},"Browser Worker":{"dept":"Workers","zone":"workers","accessory":"wrench"},"Errands Worker":{"dept":"Workers","zone":"workers","accessory":"bag"},"Affiliate Marketing":{"dept":"Ventures","zone":"ventures","accessory":"chart"},"Dropshipping":{"dept":"Ventures","zone":"ventures","accessory":"box"},"Crypto Trader":{"dept":"Ventures","zone":"ventures","accessory":"coin"},"Digital Product":{"dept":"Ventures","zone":"ventures","accessory":"cube"},"Loyalty & Status":{"dept":"Ventures","zone":"ventures","accessory":"star"},"Notion":{"dept":"Productivity","zone":"productivity","accessory":"book"},"Concierge":{"dept":"Travel","zone":"travel","accessory":"globe","note":"travel + dining concierge"},"Cocierge":{"dept":"Travel","zone":"travel","accessory":"globe","note":"alias typo"},"Social Chair":{"dept":"Dining","zone":"dining","accessory":"fork","note":"social / dining"},"Jovia Health Engineering":{"dept":"Jovia","zone":"jovia","accessory":"wrench"},"Jovia Health Organic":{"dept":"Jovia","zone":"jovia","accessory":"wrench","note":"alias\u2192Engineering"},"Jovia Health Paid":{"dept":"Jovia","zone":"jovia","accessory":"megaphone","note":"alias\u2192Marketing"}},"zones":{"lead":{"label":"LEAD","color":"#e2e8f0","origin":[2.5,0,-6.8],"w":5.0,"d":4.2},"ops":{"label":"OPS","color":"#93c5fd","origin":[2.5,0,-6.5],"w":5.0,"d":4.2},"hospitality":{"label":"HOSPITALITY","color":"#67e8f9","origin":[8.2,0,-5.8],"w":5.5,"d":5.0},"travel":{"label":"TRAVEL","color":"#93c5fd","origin":[8.5,0,0.5],"w":5.0,"d":4.0},"health":{"label":"HEALTH","color":"#fda4af","origin":[-9.5,0,5.5],"w":5.0,"d":4.0},"jovia":{"label":"JOVIA","color":"#86efac","origin":[-3.5,0,5.8],"w":6.0,"d":4.5},"finance":{"label":"FINANCE","color":"#c4b5fd","origin":[3.5,0,5.8],"w":5.0,"d":4.0},"productivity":{"label":"PRODUCTIVITY","color":"#93c5fd","origin":[9.0,0,5.5],"w":5.0,"d":4.0},"personal":{"label":"PERSONAL","color":"#a5b4fc","origin":[-9.0,0,1.5],"w":4.5,"d":3.5},"privacy":{"label":"PRIVACY","color":"#7dd3fc","origin":[0.5,0,1.2],"w":4.0,"d":3.2},"dining":{"label":"DINING","color":"#fdba74","origin":[5.0,0,1.2],"w":4.0,"d":3.2},"content":{"label":"CONTENT","color":"#fdba74","origin":[-9.0,0,-2.0],"w":4.5,"d":3.8},"workers":{"label":"WORKERS","color":"#cbd5e1","origin":[8.5,0,-1.8],"w":4.5,"d":3.5},"ventures":{"label":"VENTURES","color":"#94a3b8","origin":[2.0,0,-2.2],"w":5.5,"d":3.8}}};
 const ROOM_COL={needs:0xf43f5e,lead:0xe2e8f0,desk:0x3b82f6,lounge:0xa855f7,idle:0x94a3b8};
 const $=s=>document.querySelector(s),esc=s=>(s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let items=new Map(),selectedBot=null,officeReady=false,simulating=false,simTimer=null,hoveredBot=null,researchScreens=[],summonedBot=null,maxPerson=null,maxDeskFront=null,maxStandPos=null;
+let items=new Map(),selectedBot=null,officeReady=false,simulating=false,simTimer=null,hoveredBot=null,researchScreens=[],deskMonitors=[],summonedBot=null,maxPerson=null,maxDeskFront=null,maxStandPos=null;
 
 const BOT_AVATARS={"neutral":"#777777","palette":{"black":"#000000","brown":"#936439","red":"#FF263C","orange":"#FF6700","yellow":"#FF9800","green":"#00C972","cyan":"#00BCA6","blue":"#1084FE","violet":"#9159FE","magenta":"#FF309B","gray":"#777777"},"byName":{"Errands Worker":{"id":"096ca851-fb23-47c5-9817-d426569b2d59","colorName":"gray","hex":"#777777","shape":"pebble","source":"avatarColor"},"Loyalty & Status":{"id":"0a1454ae-dfa6-446f-85c7-1ee602bfb9b5","colorName":null,"hex":"#777777","shape":null,"source":"neutral"},"1502":{"id":"13fb674f-e80e-4145-b9b9-d92ef92d09cf","colorName":"blue","hex":"#1084FE","shape":"pebble","source":"avatarColor"},"Dropshipping":{"id":"2521d6fb-89c2-43a6-ae77-5854b37dce4b","colorName":null,"hex":"#777777","shape":null,"source":"neutral"},"Jovia Phil":{"id":"43e42232-ca49-4a20-9ff3-3901e743087a","hex":"#00C972","shape":"heart","colorName":"green","portrait":"jovia-phil","source":"avatarColor"},"Digital Product":{"id":"5b24eabd-1baf-40f2-bada-1526b9375e14","colorName":null,"hex":"#777777","shape":null,"source":"neutral"},"Grok Bot Bot":{"id":"5c76b4bc-cba1-4c2b-aaa6-b5a76bdd59a3","colorName":"blue","hex":"#1084FE","shape":"blob","source":"avatarColor"},"Jovia Health MGMT":{"id":"6398869e-b8cc-41e6-b272-f6aaaefb485c","hex":"#00C972","shape":"shield","colorName":"green","portrait":"jovia-mgmt","source":"avatarColor"},"Bookings":{"id":"6b2f763b-18ea-4aee-8d23-0d8be54fcaeb","colorName":"blue","hex":"#1084FE","shape":"squircle","source":"avatarColor","portrait":"concierge","aliasOf":"Concierge"},"Health":{"id":"6c999119-6f75-4f59-a7f9-7d401548b8fb","colorName":"red","hex":"#FF263C","shape":"squircle","source":"avatarColor","portrait":"health"},"1502 Haskell":{"id":"7e1e5696-ac0a-4007-bf3c-c0a2c1c02c0a","colorName":"cyan","hex":"#00BCA6","shape":"tablet","source":"avatarColor"},"Affiliate Marketing":{"id":"8d304ba9-9abb-453e-b75c-ecf3f3efd5cb","colorName":null,"hex":"#777777","shape":null,"source":"neutral"},"1502 Haskell Upstay":{"id":"8d95711f-81f2-4000-8b78-c1fc68cdb6b7","colorName":"cyan","hex":"#00BCA6","shape":"squircle","source":"avatarColor"},"Faceless Channel":{"id":"90495400-ce50-48eb-a839-f2eb0811ce78","colorName":"orange","hex":"#FF6700","shape":"squircle","source":"avatarColor"},"Browser Worker":{"id":"91af2943-151e-4a0e-b3f4-a8ef1a40c680","colorName":"gray","hex":"#777777","shape":"pebble","source":"avatarColor"},"Grok Bot":{"id":"b5449c50-3757-4e00-803e-6a440264108f","colorName":"black","hex":"#000000","shape":"blob","source":"avatarColor"},"Crypto Trader":{"id":"cabd44ac-d33c-4f08-bd8f-23ced84cf58b","colorName":null,"hex":"#777777","shape":null,"source":"neutral"},"Todoist":{"id":"cbd139d8-45b1-4639-9555-d749d79d5d33","colorName":"blue","hex":"#1084FE","shape":"shield","source":"avatarColor"},"Privacy Opt-outs":{"id":"d1698bbb-879a-4ef0-9930-eb39ac6ac728","colorName":"blue","hex":"#1084FE","shape":"squircle","source":"avatarColor"},"Notion":{"id":"d810c3e4-a938-4b72-8ed7-2c7d91208f74","colorName":null,"hex":"#3890e0","shape":null,"source":"asset-dominant"},"Life Timeline":{"id":"dcf1bffb-7b65-4c7b-ae91-fed432b1307f","colorName":"blue","hex":"#1084FE","shape":"squircle","source":"avatarColor"},"Operator":{"id":"e7968efc-1289-4fe8-a578-125a7fcecf44","colorName":"black","hex":"#000000","shape":"star","source":"avatarColor"},"Wealth":{"id":"ebbfcb18-21a5-4bc3-a845-301df745d084","colorName":"violet","hex":"#9159FE","shape":"blob","source":"avatarColor"},"Restaurant Finder \u00b7 Dining":{"id":"f86005ee-6b2e-4ce1-b0c7-841b06000753","colorName":"blue","hex":"#1084FE","shape":"squircle","source":"avatarColor"},"Travel":{"id":"6b2f763b-18ea-4aee-8d23-0d8be54fcaeb","colorName":"blue","hex":"#1084FE","shape":"squircle","source":"avatarColor","portrait":"concierge","aliasOf":"Concierge"},"operator":{"id":"e7968efc-1289-4fe8-a578-125a7fcecf44","colorName":"black","hex":"#000000","shape":"star","source":"avatarColor","aliasOf":"Operator"},"Concierge":{"id":"6b2f763b-18ea-4aee-8d23-0d8be54fcaeb","colorName":"blue","hex":"#1084FE","shape":"squircle","source":"avatarColor","portrait":"concierge"},"Cocierge":{"id":"6b2f763b-18ea-4aee-8d23-0d8be54fcaeb","colorName":"blue","hex":"#1084FE","shape":"squircle","source":"avatarColor","portrait":"concierge","aliasOf":"Concierge"},"Social Chair":{"id":"e8e5e980-8fca-4db5-aa27-eb06d4f0f85c","colorName":"brown","hex":"#936439","shape":"sparkle","source":"avatarColor","portrait":"social-chair"},"Jovia Health Marketing":{"id":"6e4b5f0c-57a9-4522-8d79-1ba78f076ef7","hex":"#00C972","shape":"hex","colorName":"green","portrait":"jovia-marketing","source":"avatarColor"},"Jovia Health Engineering":{"id":"eeeecd8d-a606-4b71-bb16-1e361390ab39","hex":"#00C972","shape":"squircle","colorName":"green","portrait":"jovia-engineering","source":"avatarColor"},"Jovia Marketing":{"id":"6e4b5f0c-57a9-4522-8d79-1ba78f076ef7","hex":"#00C972","shape":"hex","colorName":"green","portrait":"jovia-marketing","aliasOf":"Jovia Health Marketing","source":"avatarColor"},"Jovia Health Organic":{"id":"eeeecd8d-a606-4b71-bb16-1e361390ab39","hex":"#00C972","shape":"squircle","colorName":"green","portrait":"jovia-engineering","aliasOf":"Jovia Health Engineering","source":"avatarColor"},"Jovia Health Paid":{"id":"6e4b5f0c-57a9-4522-8d79-1ba78f076ef7","hex":"#00C972","shape":"hex","colorName":"green","portrait":"jovia-marketing","aliasOf":"Jovia Health Marketing","source":"avatarColor"}},"portraits":"app/avatars/*.glb via Meshy image-to-3d from agent avatar.png"};
 function botAvatar(name){
@@ -181,6 +184,77 @@ function loadPortraitMesh(slug){
   portraitMeshCache.set(slug,p);
   return p;
 }
+
+const propMeshCache=new Map();
+function loadPropMesh(name){
+  if(propMeshCache.has(name))return propMeshCache.get(name);
+  const url=new URL('props/'+name+'.glb', window.location.href).href;
+  const p=gltfLoader.loadAsync(url).then(gltf=>{
+    const model=gltf.scene||gltf.scenes[0];
+    model.traverse(o=>{
+      if(o.isMesh){
+        o.castShadow=false;o.receiveShadow=false;
+        if(o.material){
+          const mats=Array.isArray(o.material)?o.material:[o.material];
+          for(const m of mats){
+            if('roughness' in m)m.roughness=Math.min(0.85, m.roughness??0.7);
+            if(m.emissive && m.emissiveIntensity!=null && m.emissiveIntensity<0.15)m.emissiveIntensity=0.15;
+          }
+        }
+      }
+    });
+    return model;
+  }).catch(err=>{ console.warn('prop load failed', name, err); propMeshCache.delete(name); return null; });
+  propMeshCache.set(name,p);
+  return p;
+}
+/** Place a Meshy prop; footprint obstacles stay sync. Scales to target size. */
+function placeProp(name,{x=0,z=0,y=0,rotY=0,h=null,w=null,d=null}={}){
+  const g=new THREE.Group(); g.position.set(x,y,z); g.rotation.y=rotY; root.add(g);
+  loadPropMesh(name).then(model=>{
+    if(!model)return;
+    const c=model.clone(true);
+    const box=new THREE.Box3().setFromObject(c);
+    const size=box.getSize(new THREE.Vector3());
+    let s=1;
+    if(h)s=h/Math.max(size.y,1e-3);
+    if(w&&d){
+      const sx=w/Math.max(size.x,1e-3), sz=d/Math.max(size.z,1e-3);
+      s=Math.min(sx,sz)*(h?Math.min(1, (h/Math.max(size.y,1e-3))/Math.min(sx,sz) > 2 ? 1 : 1):1);
+      // Prefer footprint fit; clamp height if absurd
+      s=Math.min(sx,sz);
+      const nh=size.y*s;
+      if(h && nh>h*1.6)s*=(h*1.35)/nh;
+      if(h && nh<h*0.45)s*=(h*0.75)/nh;
+    }else if(h){
+      s=h/Math.max(size.y,1e-3);
+    }
+    c.scale.setScalar(s);
+    c.updateMatrixWorld(true);
+    const box2=new THREE.Box3().setFromObject(c);
+    const cen=box2.getCenter(new THREE.Vector3());
+    c.position.set(-cen.x, -box2.min.y, -cen.z);
+    g.add(c);
+  });
+  return g;
+}
+function makeDeskMonitor(x,y,z,rotY=0){
+  const c=document.createElement('canvas'); c.width=160; c.height=100;
+  const ctx=c.getContext('2d');
+  const tex=new THREE.CanvasTexture(c); tex.colorSpace=THREE.SRGBColorSpace;
+  const mat=new THREE.MeshBasicMaterial({map:tex, toneMapped:false});
+  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(0.92,0.58), mat);
+  mesh.position.set(x,y,z); mesh.rotation.y=rotY; root.add(mesh);
+  // thin dark bezel behind
+  const bezel=new THREE.Mesh(new THREE.BoxGeometry(0.98,0.64,0.04), new THREE.MeshStandardMaterial({color:0x0f172a,emissive:0x38bdf8,emissiveIntensity:0.35,roughness:0.6}));
+  bezel.position.set(x,y,z+(rotY===0?0.03:0));
+  if(Math.abs(rotY)>0.1){bezel.rotation.y=rotY; bezel.position.set(x+Math.sin(rotY)*0.03,y,z+Math.cos(rotY)*0.03)}
+  root.add(bezel);
+  const mon={mesh,bezel,tex,canvas:c,ctx,phase:Math.random()*20,scroll:0};
+  deskMonitors.push(mon);
+  return mon;
+}
+
 function fitBustOnBody(bust, body){
   const box=new THREE.Box3().setFromObject(bust);
   const size=box.getSize(new THREE.Vector3());
@@ -205,7 +279,7 @@ function makePortraitActor(color, portraitMeta, accessory='clipboard'){
   const legR=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.36,0.16),legMat.clone());legR.position.set(0.12,0.18,0);g.add(legR);
   const shoeL=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.07,0.22),shoeMat);shoeL.position.set(-0.12,0.045,0.02);g.add(shoeL);
   const shoeR=shoeL.clone();shoeR.position.x=0.13;g.add(shoeR);
-  const armMat=new THREE.MeshStandardMaterial({color:col,roughness:0.9,metalness:0,transparent:true,opacity:0.0});
+  const armMat=new THREE.MeshStandardMaterial({color:col,roughness:0.9,metalness:0,transparent:true,opacity:0.7});
   const armL=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.36,0.1),armMat);armL.position.set(-0.32,0.7,0);g.add(armL);
   const armR=armL.clone();armR.position.x=0.32;g.add(armR);
   const ring=new THREE.Mesh(new THREE.TorusGeometry(0.42,0.045,8,24),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:0.7,roughness:0.55,metalness:0}));
@@ -345,6 +419,10 @@ function updateStats(bots){
 let scene,camera,renderer,controls,root,hemi,dirLight,skyMat,floorMat,cutawayWalls=[];
 let actors=new Map(); // botName -> {group, target, room, color, stale, bobPhase, walk}
 let zoneMeshes={};
+let composer=null, bloomPass=null;
+let furnCache=new Map();
+const ACTIVITY_ICONS={Health:'✚',health:'✚',Jovia:'◇',Finance:'$',Content:'📄',Ops:'✉',Travel:'✈',Dining:'🍴',Privacy:'🛡',Productivity:'</>',Personal:'◈',Hospitality:'🔑',Workers:'🔧',Ventures:'📈',Lead:'★',docs:'📄',code:'</>',mail:'✉',charts:'📈'};
+
 const isMobile=()=>matchMedia('(max-width:768px)').matches||navigator.maxTouchPoints>1;
 
 function makeLabel(text,color='#94a3b8',scale=1,opts={}){
@@ -479,6 +557,7 @@ function steerWalk(fromX,fromZ,toX,toZ,step){
 
 function buildOffice(){
   root=new THREE.Group();scene.add(root);cutawayWalls=[];
+  deskMonitors=[];
   clearObstacles();
   // wood floor
   floorMat=new THREE.MeshStandardMaterial({color:0xc4a574,roughness:0.92,metalness:0});
@@ -517,7 +596,7 @@ function buildOffice(){
   function glassMat(){
     return new THREE.MeshStandardMaterial({
       color:0xa5f3fc, transparent:true, opacity:0.10, roughness:0.18, metalness:0.25,
-      depthWrite:false, emissive:0x22d3ee, emissiveIntensity:0.12, side:THREE.DoubleSide
+      depthWrite:false, emissive:0x22d3ee, emissiveIntensity:0.28, side:THREE.DoubleSide
     });
   }
   function addGlassPanel(w,h,d,x,y,z){
@@ -558,21 +637,22 @@ function buildOffice(){
   addObstacleRect(gX0-0.08, gX0+0.08, gZ0, gZ1, 0.1);           // west glass
   addObstacleRect(gX1-0.08, gX1+0.08, gZ0, gZ1, 0.1);           // east glass
   addObstacleRect(gX0, gX1-2.8, gZ1-0.08, gZ1+0.08, 0.1);       // south glass (doorway gap)
-  const leadDesk=box(2.2,0.4,1.1,0x1e293b,{x:-10.2,y:0.45,z:-7.2});root.add(leadDesk);
+  placeProp('meeting-table',{x:-10.2,z:-7.2,w:2.2,d:1.1,h:0.75});
   addObstacle(-10.2,-7.2,2.2,1.1,0.2);
-  const mon=box(1.2,0.75,0.08,0x0f172a,{x:-10.2,y:1.0,z:-7.65,emissive:0xf43f5e,ei:0.6});root.add(mon);
+  makeDeskMonitor(-10.2,1.15,-7.7,0);
+  // small meeting table center of Needs Max
+  placeProp('meeting-table',{x:-6.8,z:-3.2,w:2.4,d:1.2,h:0.72});
+  addObstacle(-6.8,-3.2,2.4,1.2,0.2);
   zoneMeshes.needs={origin:new THREE.Vector3(-6.8,0,-3.6),w:12.5,d:10.2};
 
   // MAX — NE back corner of Needs Max, back against north+east glass, facing into room / toward camera.
   // Warm gold #E8C547 (not in bot palette). Desk parallel to east wall; Max east of desk; bots stop west (front).
   const MAX_GOLD=0xe8c547;
   const bossX=-1.55, bossZ=-7.85; // tight against gX1≈-0.55, gZ0≈-8.7
-  // Desk: depth along X, width along Z (backs to east wall)
-  root.add(box(1.1,0.42,2.2,0x1e293b,{x:bossX,y:0.48,z:bossZ}));
-  root.add(box(1.0,0.08,2.1,0x334155,{x:bossX,y:0.72,z:bossZ}));
+  // Desk: Meshy gold executive desk (depth along X, width along Z)
+  placeProp('max-gold-desk',{x:bossX,z:bossZ,rotY:Math.PI/2,w:1.15,d:2.25,h:0.85});
   addObstacle(bossX, bossZ, 1.1, 2.2, 0.25);
-  // Monitor on room-facing (west) side
-  root.add(box(0.07,0.55,0.9,0x0f172a,{x:bossX-0.5,y:1.15,z:bossZ,emissive:0xe8c547,ei:0.55}));
+  makeDeskMonitor(bossX-0.52,1.2,bossZ, Math.PI/2);
   root.add(box(0.25,0.12,0.35,0xf8fafc,{x:bossX+0.1,y:0.82,z:bossZ+0.75}));
   const bossPlate=floorLabel('MAX','#E8C547');bossPlate.scale.set(0.38,0.38,0.38);bossPlate.position.set(bossX-1.2,0.05,bossZ);root.add(bossPlate);
   // Behind desk, back nearly touching east+north glass
@@ -591,14 +671,12 @@ function buildOffice(){
   const desks=glowZone(10.5,7.5,0x3b82f6);desks.position.set(4.5,0,-3.8);root.add(desks);
   const dl=floorLabel('WORKING','#93c5fd');dl.position.set(4.5,0.05,-6.8);root.add(dl);
   zoneMeshes.desk={origin:new THREE.Vector3(4.5,0,-3.8),w:10.5,d:7.5};
-  // desk furniture grid
+  // desk furniture grid — Meshy desks/chairs + flickering monitors
   for(let i=0;i<6;i++){
     const x=0.8+(i%3)*3.2,z=-6.2+Math.floor(i/3)*2.6;
-    root.add(box(1.6,0.35,0.9,0x334155,{x,y:0.4,z}));
-    root.add(box(0.9,0.55,0.06,0x0f172a,{x,y:0.9,z:z-0.4,emissive:0x38bdf8,ei:0.7}));
-    // low open-plan chair (no freestanding cubicle/divider pedestals)
-    root.add(box(0.48,0.12,0.48,0x1e293b,{x:x+0.7,y:0.28,z:z+0.55}));
-    root.add(box(0.48,0.32,0.06,0x334155,{x:x+0.7,y:0.5,z:z+0.76}));
+    placeProp('office-desk',{x,z,w:1.55,d:0.85,h:0.78});
+    makeDeskMonitor(x,0.95,z-0.42,0);
+    placeProp('office-chair',{x:x+0.65,z:z+0.55,rotY:Math.PI+0.15,h:0.9,w:0.55,d:0.55});
     addObstacle(x, z, 1.6, 0.9, 0.22);
     addObstacle(x+0.7, z+0.55, 0.55, 0.55, 0.12);
   }
@@ -610,10 +688,10 @@ function buildOffice(){
   // rug + sofa
   const rug=new THREE.Mesh(new THREE.CircleGeometry(2.2,32),new THREE.MeshStandardMaterial({color:0x166534,roughness:1}));
   rug.rotation.x=-Math.PI/2;rug.position.set(-7.5,0.04,4.8);root.add(rug);
-  // open lounge seating (low sofas — no tall divider panels)
-  root.add(box(3.2,0.42,1.1,0x4b5563,{x:-8.4,y:0.38,z:4.0}));
-  root.add(box(1.1,0.42,2.0,0x4b5563,{x:-6.4,y:0.38,z:4.9}));
-  root.add(box(1.0,0.22,1.0,0x78716c,{x:-7.5,y:0.28,z:5.0}));
+  // open lounge seating — Meshy sofas + coffee table
+  placeProp('sofa',{x:-8.4,z:4.0,rotY:0,w:3.1,d:1.05,h:0.85});
+  placeProp('sofa',{x:-6.4,z:4.9,rotY:Math.PI/2,w:2.0,d:1.05,h:0.85});
+  placeProp('meeting-table',{x:-7.5,z:5.0,w:1.05,d:1.05,h:0.45});
   addObstacle(-8.4,4.0,3.2,1.1,0.2);
   addObstacle(-6.4,4.9,1.1,2.0,0.2);
   addObstacle(-7.5,5.0,1.0,1.0,0.15);
@@ -629,12 +707,15 @@ function buildOffice(){
   addObstacle(7.6,6.5,0.7,0.7,0.15);
   for(let i=0;i<3;i++)addObstacle(4.2+i*0.7,5.7,0.4,0.4,0.1);
 
-  // plants + decor
+  // plants + floor lamps (Meshy)
   for(const[x,z] of [[-12,7.5],[11.5,7.5],[11.5,-7.5],[-1.5,7.8],[0.5,-8.2],[6,7.2],[-5,7.2]]){
-    root.add(box(0.35,0.9,0.35,0x365314,{x,y:0.55,z}));
-    const leaf=new THREE.Mesh(new THREE.SphereGeometry(0.45,10,10),new THREE.MeshStandardMaterial({color:0x22c55e,roughness:0.85,metalness:0}));
-    leaf.position.set(x,1.2,z);root.add(leaf);
+    placeProp('plant-pot',{x,z,h:1.35,w:0.7,d:0.7});
     addObstacle(x,z,0.7,0.7,0.1);
+  }
+  for(const[x,z] of [[-11.2,-7.8],[10.5,6.8],[-4.2,2.8],[8.8,-5.2]]){
+    placeProp('floor-lamp',{x,z,h:1.9,w:0.45,d:0.45});
+    addObstacle(x,z,0.4,0.4,0.08);
+    const glow=new THREE.PointLight(0xfde68a,0.45,6,2); glow.position.set(x,1.7,z); root.add(glow);
   }
   // Department zones — carpet lettering (never covered by glare)
   researchScreens=[];
@@ -646,21 +727,21 @@ function buildOffice(){
     pad.rotation.x=-Math.PI/2;pad.position.set(zdef.origin[0],0.02,zdef.origin[2]);root.add(pad);
     // v8: no department floor lettering — colored carpet pads mark zones
     zoneMeshes[zkey]={origin:new THREE.Vector3(zdef.origin[0],0,zdef.origin[2]),w:zdef.w,d:zdef.d};
-    root.add(box(1.2,0.32,0.7,0x334155,{x:zdef.origin[0],y:0.35,z:zdef.origin[2]-zdef.d*0.28}));
+    placeProp('office-desk',{x:zdef.origin[0],z:zdef.origin[2]-zdef.d*0.28,w:1.15,d:0.65,h:0.7});
     addObstacle(zdef.origin[0], zdef.origin[2]-zdef.d*0.28, 1.2, 0.7, 0.18);
   }
   // Lead glass corner office (Grok Bot) — EAST of Needs Max (no panels inside Max's room)
   {
     const lx=2.5,lz=-6.8,lw=4.8,ld=4.0; // west edge ≈+0.1, clear of Needs Max east ≈-0.55
     const x0=lx-lw/2,x1=lx+lw/2,z0=lz-ld/2,z1=lz+ld/2;
-    function gMat(){return new THREE.MeshStandardMaterial({color:0xe0f2fe,transparent:true,opacity:0.10,roughness:0.2,metalness:0.2,depthWrite:false,emissive:0xbae6fd,emissiveIntensity:0.1,side:THREE.DoubleSide})}
+    function gMat(){return new THREE.MeshStandardMaterial({color:0xe0f2fe,transparent:true,opacity:0.10,roughness:0.2,metalness:0.2,depthWrite:false,emissive:0xbae6fd,emissiveIntensity:0.22,side:THREE.DoubleSide})}
     function gPanel(w,h,d,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),gMat());m.position.set(x,y,z);m.renderOrder=2;root.add(m)}
     function frm(w,h,d,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color:0xf8fafc,emissive:0x38bdf8,emissiveIntensity:0.4,roughness:0.5}));m.position.set(x,y,z);m.renderOrder=3;root.add(m)}
     gPanel(lw,2.5,0.04,(x0+x1)/2,1.35,z0); frm(lw+0.06,0.04,0.05,(x0+x1)/2,2.6,z0); frm(lw+0.06,0.04,0.05,(x0+x1)/2,0.15,z0);
     gPanel(0.04,2.5,ld,x0,1.35,(z0+z1)/2); frm(0.05,0.04,ld+0.06,x0,2.6,(z0+z1)/2);
     gPanel(lw*0.55,2.5,0.04,x0+lw*0.275,1.35,z1); // partial south (door)
-    root.add(box(1.6,0.35,0.9,0x1e293b,{x:lx,y:0.4,z:lz-0.6}));
-    root.add(box(0.9,0.55,0.06,0x0f172a,{x:lx,y:0.9,z:lz-1.0,emissive:0xe2e8f0,ei:0.5}));
+    placeProp('office-desk',{x:lx,z:lz-0.6,w:1.55,d:0.85,h:0.78});
+    makeDeskMonitor(lx,0.95,lz-1.0,0);
     zoneMeshes.lead={origin:new THREE.Vector3(lx,0,lz),w:lw,d:ld};
     // Lead glass + desk collision (south partial — doorway on east half)
     addObstacleRect(x0, x1, z0-0.06, z0+0.06, 0.08);
@@ -1062,7 +1143,9 @@ function applyBots(instant){
         group.position.copy(pos);group.rotation.y=rot;root.add(group);a.group=group;a.shape=b.shape;a.color=b.color;a.portrait=pmeta2?pmeta2.slug:null;
       }
       a.homeTarget=a.homeTarget||target.clone();a.homeTarget.copy(target);
-      a.room=room;a.stale=b.stale;a.color=b.color;a.shape=b.shape;
+      a.stale=b.stale;a.color=b.color;a.shape=b.shape;
+      if(a.room && a.room!=='idle' && room==='idle'){a.celebrateUntil=performance.now()+1800}
+      a.room=room;a.openBlocked=!!b.openBlockedMax;a._partIcon=null;
       if(a.wiggleUntil&&performance.now()<a.wiggleUntil){
         /* hold during click wiggle */
       }else if(a.summoned){a.target.copy(maxDeskFront||target)}
@@ -1147,16 +1230,26 @@ function ensureOffice(){
   // Default: Needs Max meeting room corner nearest the viewer (front)
   camera.position.set(-18.5,12.2,-16.5);
   renderer=new THREE.WebGLRenderer({antialias:!isMobile(),alpha:false,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,isMobile()?2:2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio,isMobile()?1.75:2));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=1.05;
   host.appendChild(renderer.domElement);
   controls=new OrbitControls(camera,renderer.domElement);
   controls.target.set(-5.2,0.4,-4.0);controls.enableDamping=true;controls.dampingFactor=0.06;
   controls.maxPolarAngle=Math.PI*0.46;controls.minDistance=9;controls.maxDistance=34;
   controls.enablePan=!isMobile();
-  hemi=new THREE.HemisphereLight(0xffe4c4,0x1e293b,0.85);scene.add(hemi);
-  dirLight=new THREE.DirectionalLight(0xfff1d6,1.05);dirLight.position.set(10,16,8);scene.add(dirLight);
+  hemi=new THREE.HemisphereLight(0xffe4c4,0x1e293b,0.9);scene.add(hemi);
+  dirLight=new THREE.DirectionalLight(0xfff1d6,1.15);dirLight.position.set(10,16,8);scene.add(dirLight);
+  const fill=new THREE.PointLight(0x38bdf8,0.35,40,2);fill.position.set(-6,4,-2);scene.add(fill);
+  const fill2=new THREE.PointLight(0xfbbf24,0.25,35,2);fill2.position.set(6,3.5,4);scene.add(fill2);
   buildOffice();
+  // Soft bloom — keep mild for mobile readability
+  const w=host.clientWidth||1,h=host.clientHeight||1;
+  composer=new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene,camera));
+  bloomPass=new UnrealBloomPass(new THREE.Vector2(w,h), isMobile()?0.28:0.45, 0.55, 0.82);
+  composer.addPass(bloomPass);
   const raycaster=new THREE.Raycaster();const pointer=new THREE.Vector2();
   renderer.domElement.addEventListener('pointerdown',ev=>{
     const rect=renderer.domElement.getBoundingClientRect();
@@ -1188,7 +1281,8 @@ function ensureOffice(){
     updateLabelVisibility();
     updateCutaway();
     controls.update();
-    renderer.render(scene,camera);
+    if(composer)composer.render();
+    else renderer.render(scene,camera);
   })(performance.now());
 }
 
@@ -1234,9 +1328,98 @@ function updateLabelVisibility(){
     }
   }
 }
+
+/** Per-bot activity FX: floor ring, task particles, bang mark, celebration sparks */
+function ensureActivityFx(a){
+  const g=a.group, ud=g.userData;
+  if(!ud.actRing){
+    const ring=new THREE.Mesh(
+      new THREE.RingGeometry(0.38,0.52,24),
+      new THREE.MeshBasicMaterial({color:0x38bdf8,transparent:true,opacity:0.0,side:THREE.DoubleSide,depthWrite:false})
+    );
+    ring.rotation.x=-Math.PI/2; ring.position.y=0.03; ring.renderOrder=5;
+    g.add(ring); ud.actRing=ring;
+  }
+  if(!ud.bang){
+    const c=document.createElement('canvas'); c.width=64; c.height=64;
+    const ctx=c.getContext('2d');
+    ctx.clearRect(0,0,64,64);
+    ctx.fillStyle='#f43f5e'; ctx.font='bold 52px system-ui,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('!',32,36);
+    const tex=new THREE.CanvasTexture(c); tex.colorSpace=THREE.SRGBColorSpace;
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false,opacity:0}));
+    sp.scale.set(0.45,0.45,1); sp.position.set(0.35,1.75,0); sp.visible=false;
+    g.add(sp); ud.bang=sp;
+  }
+  if(!ud.particles){
+    const group=new THREE.Group(); group.position.set(0,1.7,0); g.add(group); ud.particles=group;
+  }
+  if(!ud.celeb){
+    const group=new THREE.Group(); g.add(group); ud.celeb=group;
+    for(let i=0;i<6;i++){
+      const c=document.createElement('canvas'); c.width=32; c.height=32;
+      const ctx=c.getContext('2d');
+      ctx.fillStyle=['#22c55e','#fbbf24','#38bdf8','#f472b6'][i%4];
+      ctx.beginPath(); ctx.arc(16,16,10,0,Math.PI*2); ctx.fill();
+      const tex=new THREE.CanvasTexture(c); tex.colorSpace=THREE.SRGBColorSpace;
+      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false,opacity:0.9}));
+      sp.scale.set(0.18,0.18,1); sp.userData.phase=i*0.9;
+      group.add(sp);
+    }
+  }
+}
+function setParticleIcons(a, icon, color){
+  const ud=a.group.userData; if(!ud.particles)return;
+  while(ud.particles.children.length){const c=ud.particles.children.pop(); c.material?.map?.dispose?.(); c.material?.dispose?.()}
+  if(!icon)return;
+  for(let i=0;i<3;i++){
+    const c=document.createElement('canvas'); c.width=64; c.height=64;
+    const ctx=c.getContext('2d');
+    ctx.clearRect(0,0,64,64);
+    ctx.fillStyle=color||'#7dd3fc';
+    ctx.font='bold 40px system-ui,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(icon,32,34);
+    const tex=new THREE.CanvasTexture(c); tex.colorSpace=THREE.SRGBColorSpace;
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false,opacity:0.9}));
+    sp.scale.set(0.28,0.28,1);
+    sp.userData.phase=i*2.1;
+    ud.particles.add(sp);
+  }
+}
+function activityIconFor(a){
+  const meta=BOT_DEPTS.byName[a.group.userData.bot]||{};
+  const dept=meta.dept||'';
+  return ACTIVITY_ICONS[dept]||ACTIVITY_ICONS[a.zone]||'●';
+}
+
 function animateActors(dt,t){
   // research screen animations
   for(const s of researchScreens){if(s.tick)s.tick(t)}
+  // desk monitor flicker / scroll — brighter when any bot is working
+  const anyWorking=[...actors.values()].some(a=>a.room==='desk'||a.room==='lead');
+  for(const m of deskMonitors){
+    const ctx=m.ctx,c=m.canvas;
+    m.scroll=(m.scroll||0)+ (anyWorking?1.8:0.5);
+    const pulse=anyWorking?(0.55+0.45*Math.abs(Math.sin(t*8+m.phase))):(0.25+0.1*Math.sin(t*2+m.phase));
+    ctx.fillStyle='#020617';ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle=`rgba(56,189,248,${0.35+pulse*0.5})`;
+    for(let i=0;i<7;i++){
+      const y=((i*14+m.scroll*(anyWorking?1.2:0.4))%110)-10;
+      ctx.fillRect(8,y,c.width-16,3+((i+Math.floor(m.scroll))%3));
+    }
+    if(anyWorking){
+      ctx.fillStyle='#4ade80';ctx.font='bold 11px monospace';
+      ctx.fillText('> working…',10,18);
+      ctx.fillStyle='#7dd3fc';ctx.fillText('█'.repeat(1+Math.floor(t*6+m.phase)%8),10,88);
+    }else{
+      ctx.fillStyle='#334155';ctx.font='10px monospace';ctx.fillText('idle',10,18);
+    }
+    m.tex.needsUpdate=true;
+    if(m.bezel&&m.bezel.material&&m.bezel.material.emissiveIntensity!=null){
+      m.bezel.material.emissiveIntensity=anyWorking?(0.45+0.55*pulse):0.2;
+    }
+  }
   // blink server racks
   if(root&&root.userData.racks){
     for(const rk of root.userData.racks){
@@ -1286,22 +1469,75 @@ function animateActors(dt,t){
       g.position.x=a.target.x;g.position.z=a.target.z;
       if(ud.legL){ud.legL.rotation.x=0;ud.legR.rotation.x=0}
       if(ud.armL){ud.armL.rotation.x=0;ud.armR.rotation.x=0}
+      ensureActivityFx(a);
+      // Reset transient FX defaults each rest frame
+      if(ud.actRing){ud.actRing.material.opacity=0}
+      if(ud.bang){ud.bang.visible=false;ud.bang.material.opacity=0}
+      if(ud.particles)ud.particles.visible=false;
+      if(ud.celeb)ud.celeb.visible=false;
       if(a.summoned&&maxStandPos){
         g.rotation.y=Math.atan2(maxStandPos.x-g.position.x, maxStandPos.z-g.position.z);
         if(ud.body)ud.body.position.y=0.62;if(ud.head)ud.head.position.y=1.18;
         ud.ring.material.emissiveIntensity=1.0+Math.sin(t*3)*0.25;
-      }else if(a.room==='idle'||a.room==='lounge'){
-        // Idle / lounge / break: NO bob — tags stay pinned
+        // blocked_max at Max: glowing !
+        if(a.room==='needs'||a.openBlocked){
+          ud.bang.visible=true; ud.bang.material.opacity=0.75+0.25*Math.sin(t*6);
+          ud.bang.position.y=1.75+Math.sin(t*4)*0.05;
+        }
+      }else if(a.room==='idle'){
+        // Done / idle: brief celebration pulse then settle
         if(ud.body)ud.body.position.y=0.62;if(ud.head)ud.head.position.y=1.18;
-        ud.ring.material.emissiveIntensity=a.stale?0.1:0.45;
+        ud.ring.material.emissiveIntensity=a.stale?0.1:0.4;
+        if(a.celebrateUntil && performance.now()<a.celebrateUntil){
+          ud.celeb.visible=true;
+          const k=1-(a.celebrateUntil-performance.now())/1800;
+          g.scale.setScalar(1+0.08*Math.sin(k*Math.PI));
+          if(ud.actRing){ud.actRing.material.color.setHex(0x22c55e);ud.actRing.material.opacity=0.55*(1-k);ud.actRing.scale.setScalar(1+k*1.4)}
+          ud.celeb.children.forEach((sp,i)=>{
+            const ph=k*Math.PI*2+sp.userData.phase;
+            sp.position.set(Math.cos(ph)*(0.3+i*0.04), 1.2+k*1.1+Math.sin(ph*2)*0.1, Math.sin(ph)*(0.3+i*0.04));
+            sp.material.opacity=0.95*(1-k);
+            sp.scale.setScalar(0.16+0.1*(1-k));
+          });
+        }else{g.scale.set(1,1,1);a.celebrateUntil=0}
+      }else if(a.room==='lounge'){
+        // Waiting: idle sway + "check watch" arm dip
+        if(ud.body)ud.body.position.y=0.62;if(ud.head)ud.head.position.y=1.18;
+        g.rotation.y=Math.sin(t*0.6+a.bob)*0.25;
+        if(ud.armR){ud.armR.rotation.x=-0.5+Math.sin(t*1.2+a.bob)*0.35; ud.armR.rotation.z=0.4}
+        if(ud.armL){ud.armL.rotation.x=0; ud.armL.rotation.z=0}
+        ud.ring.material.emissiveIntensity=0.35+Math.sin(t*2)*0.1;
+        if(ud.actRing){ud.actRing.material.color.setHex(0xa855f7);ud.actRing.material.opacity=0.25+0.1*Math.sin(t*2)}
       }else if(a.room==='desk'||a.room==='lead'){
-        if(ud.body)ud.body.position.y=0.62+Math.sin(t*5+a.bob)*0.02;
-        if(ud.head)ud.head.position.y=1.18+Math.sin(t*5+a.bob)*0.015;
+        // Working: typing arms, bob, pulsing floor ring, floating task icons
+        const type=Math.sin(t*14+a.bob);
+        if(ud.body)ud.body.position.y=0.62+Math.abs(Math.sin(t*6+a.bob))*0.035;
+        if(ud.head)ud.head.position.y=1.18+Math.sin(t*5+a.bob)*0.02;
+        if(ud.armL){ud.armL.rotation.x=-0.9+type*0.45; ud.armL.rotation.z=0.15}
+        if(ud.armR){ud.armR.rotation.x=-0.9-type*0.45; ud.armR.rotation.z=-0.15}
         g.rotation.y=a.room==='lead'?Math.PI*0.2:Math.PI;
-        ud.ring.material.emissiveIntensity=0.85+Math.sin(t*4)*0.2;
+        ud.ring.material.emissiveIntensity=0.95+Math.sin(t*5)*0.35;
+        if(ud.actRing){
+          ud.actRing.material.color.setHex(0x38bdf8);
+          ud.actRing.material.opacity=0.35+0.35*Math.abs(Math.sin(t*3));
+          ud.actRing.scale.setScalar(1+0.12*Math.sin(t*3));
+        }
+        ud.particles.visible=true;
+        if(!a._partIcon){a._partIcon=activityIconFor(a); setParticleIcons(a,a._partIcon,'#7dd3fc')}
+        ud.particles.children.forEach((sp,i)=>{
+          const ph=t*1.6+sp.userData.phase;
+          sp.position.set(Math.sin(ph)*(0.25+i*0.05), 0.15+Math.sin(ph*1.3)*0.2+i*0.08, Math.cos(ph)*0.2);
+          sp.material.opacity=0.55+0.35*Math.sin(ph*2);
+        });
       }else if(a.room==='needs'){
+        // Needs Max: attentive stance + glowing !
         if(ud.body)ud.body.position.y=0.62;if(ud.head)ud.head.position.y=1.18;
-        ud.ring.material.emissiveIntensity=0.75+Math.sin(t*3.5)*0.35;
+        if(ud.armL){ud.armL.rotation.x=0;ud.armL.rotation.z=0}
+        if(ud.armR){ud.armR.rotation.x=0;ud.armR.rotation.z=0}
+        ud.ring.material.emissiveIntensity=0.85+Math.sin(t*4)*0.4;
+        ud.bang.visible=true; ud.bang.material.opacity=0.7+0.3*Math.sin(t*5);
+        ud.bang.position.y=1.8+Math.sin(t*3)*0.06;
+        if(ud.actRing){ud.actRing.material.color.setHex(0xf43f5e);ud.actRing.material.opacity=0.4+0.25*Math.sin(t*4)}
       }else{
         if(ud.body)ud.body.position.y=0.62;if(ud.head)ud.head.position.y=1.18;
       }
@@ -1313,6 +1549,7 @@ function animateActors(dt,t){
 function resizeOffice(){
   if(!renderer)return;const host=$('#officeCanvas');const w=host.clientWidth||1,h=host.clientHeight||1;
   camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);
+  if(composer){composer.setSize(w,h);if(bloomPass)bloomPass.setSize(w,h)}
 }
 
 function setTod(mode){
@@ -1332,7 +1569,7 @@ document.querySelectorAll('.tod button').forEach(b=>b.onclick=()=>setTod(b.datas
 
 window.__summonBot=(name)=>{summonToMax(name);selectedBot=name;renderPanel(name)};
 window.__dismissSummon=()=>dismissSummon();
-window.__officeProbe=()=>{const a=summonedBot&&actors.get(summonedBot);const dist=a&&a.target?Math.hypot(a.target.x-a.group.position.x,a.target.z-a.group.position.z):null;let labelsTotal=0,labelsVisible=0;for(const act of actors.values()){const lab=act.group.userData.label;if(!lab)continue;labelsTotal++;if(lab.visible)labelsVisible++}return{actorCount:actors.size,obstacleCount:obstacles.length,names:[...actors.keys()],maxOk:!!maxPerson&&!!maxDeskFront,summoned:summonedBot,wiggling:!!(a&&a.wiggleUntil&&performance.now()<a.wiggleUntil),dist,desk:maxDeskFront?{x:maxDeskFront.x,z:maxDeskFront.z}:null,botIdSample:botId('Grok Bot Bot'),portraitCount:[...actors.values()].filter(x=>x.portrait).length,portraitNames:[...actors.values()].filter(x=>x.portrait).map(x=>x.group.userData.bot),panelLink:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('href')||null,panelTarget:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('target')||null,panelRel:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('rel')||null,needsCount:summarizeBots().filter(b=>b.room==='needs').length,labelsTotal,labelsVisible};};
+window.__officeProbe=()=>{const a=summonedBot&&actors.get(summonedBot);const dist=a&&a.target?Math.hypot(a.target.x-a.group.position.x,a.target.z-a.group.position.z):null;let labelsTotal=0,labelsVisible=0;for(const act of actors.values()){const lab=act.group.userData.label;if(!lab)continue;labelsTotal++;if(lab.visible)labelsVisible++}return{actorCount:actors.size,obstacleCount:obstacles.length,names:[...actors.keys()],maxOk:!!maxPerson&&!!maxDeskFront,summoned:summonedBot,wiggling:!!(a&&a.wiggleUntil&&performance.now()<a.wiggleUntil),dist,desk:maxDeskFront?{x:maxDeskFront.x,z:maxDeskFront.z}:null,botIdSample:botId('Grok Bot Bot'),portraitCount:[...actors.values()].filter(x=>x.portrait).length,portraitNames:[...actors.values()].filter(x=>x.portrait).map(x=>x.group.userData.bot),panelLink:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('href')||null,panelTarget:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('target')||null,panelRel:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('rel')||null,needsCount:summarizeBots().filter(b=>b.room==='needs').length,labelsTotal,labelsVisible,deskMonitorCount:deskMonitors.length,propCacheSize:propMeshCache.size};};
 window.__aimMaxDesk=()=>{if(!controls||!maxStandPos)return;controls.target.set(maxStandPos.x,0.7,maxStandPos.z);camera.position.set(maxStandPos.x-6.5,7.2,maxStandPos.z-5.8);controls.update()};
 window.__aimMaxCorner=()=>{if(!controls||!maxStandPos)return;controls.target.set(maxStandPos.x-0.2,0.95,maxStandPos.z+0.15);camera.position.set(maxStandPos.x-5.2,5.6,maxStandPos.z+3.4);controls.update()};
 window.__resetCam=()=>{if(!controls||!camera)return;camera.position.set(-18.5,12.2,-16.5);controls.target.set(-5.2,0.4,-4.0);controls.update()};
