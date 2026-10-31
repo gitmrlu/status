@@ -217,7 +217,8 @@
     "Jovia Marketing": {
       "dept": "Jovia",
       "zone": "jovia",
-      "accessory": "megaphone"
+      "accessory": "megaphone",
+      "note": "alias"
     },
     "Wealth": {
       "dept": "Finance",
@@ -306,6 +307,23 @@
       "zone": "dining",
       "accessory": "fork",
       "note": "social / dining"
+    },
+    "Jovia Health Engineering": {
+      "dept": "Jovia",
+      "zone": "jovia",
+      "accessory": "wrench"
+    },
+    "Jovia Health Organic": {
+      "dept": "Jovia",
+      "zone": "jovia",
+      "accessory": "wrench",
+      "note": "alias\u2192Engineering"
+    },
+    "Jovia Health Paid": {
+      "dept": "Jovia",
+      "zone": "jovia",
+      "accessory": "megaphone",
+      "note": "alias\u2192Marketing"
     }
   },
   "rooms": {

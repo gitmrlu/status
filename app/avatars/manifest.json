@@ -17,6 +17,30 @@
       "legs": "#4b5563",
       "shoes": "#1c1917",
       "label": "Social Chair"
+    },
+    "6398869e-b8cc-41e6-b272-f6aaaefb485c": {
+      "slug": "jovia-mgmt",
+      "legs": "#14532d",
+      "shoes": "#052e16",
+      "label": "Jovia Health MGMT"
+    },
+    "6e4b5f0c-57a9-4522-8d79-1ba78f076ef7": {
+      "slug": "jovia-marketing",
+      "legs": "#166534",
+      "shoes": "#052e16",
+      "label": "Jovia Health Marketing"
+    },
+    "eeeecd8d-a606-4b71-bb16-1e361390ab39": {
+      "slug": "jovia-engineering",
+      "legs": "#3f6212",
+      "shoes": "#14532d",
+      "label": "Jovia Health Engineering"
+    },
+    "43e42232-ca49-4a20-9ff3-3901e743087a": {
+      "slug": "jovia-phil",
+      "legs": "#15803d",
+      "shoes": "#052e16",
+      "label": "Jovia Phil"
     }
   },
   "source": "Meshy image-to-3d from each bot's avatar.png (Faceless Channel MESHY_API_KEY)",

@@ -103,9 +103,10 @@
     },
     "Jovia Phil": {
       "id": "43e42232-ca49-4a20-9ff3-3901e743087a",
-      "colorName": "green",
       "hex": "#00C972",
       "shape": "heart",
+      "colorName": "green",
+      "portrait": "jovia-phil",
       "source": "avatarColor"
     },
     "Digital Product": {
@@ -124,9 +125,10 @@
     },
     "Jovia Health MGMT": {
       "id": "6398869e-b8cc-41e6-b272-f6aaaefb485c",
-      "colorName": "green",
       "hex": "#00C972",
       "shape": "shield",
+      "colorName": "green",
+      "portrait": "jovia-mgmt",
       "source": "avatarColor"
     },
     "Bookings": {
@@ -145,13 +147,6 @@
       "shape": "squircle",
       "source": "avatarColor",
       "portrait": "health"
-    },
-    "Jovia Marketing": {
-      "id": "6e4b5f0c-57a9-4522-8d79-1ba78f076ef7",
-      "colorName": "green",
-      "hex": "#00C972",
-      "shape": "hex",
-      "source": "avatarColor"
     },
     "1502 Haskell": {
       "id": "7e1e5696-ac0a-4007-bf3c-c0a2c1c02c0a",
@@ -244,13 +239,6 @@
       "shape": "blob",
       "source": "avatarColor"
     },
-    "Jovia Health Marketing": {
-      "id": "eeeecd8d-a606-4b71-bb16-1e361390ab39",
-      "colorName": "green",
-      "hex": "#00C972",
-      "shape": "squircle",
-      "source": "avatarColor"
-    },
     "Restaurant Finder \u00b7 Dining": {
       "id": "f86005ee-6b2e-4ce1-b0c7-841b06000753",
       "colorName": "blue",
@@ -299,6 +287,49 @@
       "shape": "sparkle",
       "source": "avatarColor",
       "portrait": "social-chair"
+    },
+    "Jovia Health Marketing": {
+      "id": "6e4b5f0c-57a9-4522-8d79-1ba78f076ef7",
+      "hex": "#00C972",
+      "shape": "hex",
+      "colorName": "green",
+      "portrait": "jovia-marketing",
+      "source": "avatarColor"
+    },
+    "Jovia Health Engineering": {
+      "id": "eeeecd8d-a606-4b71-bb16-1e361390ab39",
+      "hex": "#00C972",
+      "shape": "squircle",
+      "colorName": "green",
+      "portrait": "jovia-engineering",
+      "source": "avatarColor"
+    },
+    "Jovia Marketing": {
+      "id": "6e4b5f0c-57a9-4522-8d79-1ba78f076ef7",
+      "hex": "#00C972",
+      "shape": "hex",
+      "colorName": "green",
+      "portrait": "jovia-marketing",
+      "aliasOf": "Jovia Health Marketing",
+      "source": "avatarColor"
+    },
+    "Jovia Health Organic": {
+      "id": "eeeecd8d-a606-4b71-bb16-1e361390ab39",
+      "hex": "#00C972",
+      "shape": "squircle",
+      "colorName": "green",
+      "portrait": "jovia-engineering",
+      "aliasOf": "Jovia Health Engineering",
+      "source": "avatarColor"
+    },
+    "Jovia Health Paid": {
+      "id": "6e4b5f0c-57a9-4522-8d79-1ba78f076ef7",
+      "hex": "#00C972",
+      "shape": "hex",
+      "colorName": "green",
+      "portrait": "jovia-marketing",
+      "aliasOf": "Jovia Health Marketing",
+      "source": "avatarColor"
     }
   },
   "byId": {
