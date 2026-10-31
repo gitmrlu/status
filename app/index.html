@@ -495,7 +495,11 @@ function box(w,h,d,color,opts={}){
 
 /** Axis-aligned furniture/wall footprints bots must walk around (XZ plane). */
 let obstacles=[];
-function clearObstacles(){obstacles=[]}
+const ACTOR_R=0.34;
+const NAV_CELL=0.42;
+const SLOT_SEP=0.95;
+let navGrid=null; // {minX,minZ,cols,rows,cell,walk:Uint8Array}
+function clearObstacles(){obstacles=[];navGrid=null}
 function addObstacle(x,z,w,d,pad=0.18){
   const hw=w/2+pad, hd=d/2+pad;
   obstacles.push({minX:x-hw,maxX:x+hw,minZ:z-hd,maxZ:z+hd,x,z,w,d});
@@ -503,56 +507,312 @@ function addObstacle(x,z,w,d,pad=0.18){
 function addObstacleRect(minX,maxX,minZ,maxZ,pad=0.12){
   obstacles.push({minX:minX-pad,maxX:maxX+pad,minZ:minZ-pad,maxZ:maxZ+pad});
 }
-function pointBlocked(x,z,r=0.28){
+function pointBlocked(x,z,r=ACTOR_R){
   for(const o of obstacles){
     if(x+r>o.minX && x-r<o.maxX && z+r>o.minZ && z-r<o.maxZ)return o;
   }
   return null;
 }
-function pushOutOfObstacles(x,z,r=0.28){
-  let px=x,pz=z;
-  for(let n=0;n<6;n++){
-    const o=pointBlocked(px,pz,r); if(!o)break;
-    const cx=(o.minX+o.maxX)/2, cz=(o.minZ+o.maxZ)/2;
-    const dx=px-cx, dz=pz-cz;
-    const left=px-o.minX, right=o.maxX-px, near=pz-o.minZ, far=o.maxZ-pz;
-    const m=Math.min(left,right,near,far);
-    if(m===left)px=o.minX-r-0.02;
-    else if(m===right)px=o.maxX+r+0.02;
-    else if(m===near)pz=o.minZ-r-0.02;
-    else pz=o.maxZ+r+0.02;
+function rebuildNavGrid(){
+  const minX=-12.6, maxX=12.6, minZ=-8.6, maxZ=8.6;
+  const cell=NAV_CELL;
+  const cols=Math.ceil((maxX-minX)/cell), rows=Math.ceil((maxZ-minZ)/cell);
+  const walk=new Uint8Array(cols*rows);
+  const inflate=ACTOR_R;
+  for(let iz=0;iz<rows;iz++){
+    for(let ix=0;ix<cols;ix++){
+      const x=minX+(ix+0.5)*cell, z=minZ+(iz+0.5)*cell;
+      let ok=1;
+      for(const o of obstacles){
+        if(x+inflate>o.minX && x-inflate<o.maxX && z+inflate>o.minZ && z-inflate<o.maxZ){ok=0;break}
+      }
+      walk[iz*cols+ix]=ok;
+    }
   }
-  return {x:px,z:pz};
+  navGrid={minX,minZ,cols,rows,cell,walk};
+  return navGrid;
 }
-/** Greedy local steer: prefer direct step; else slide on free axis; else 8-dir ring. */
-function steerWalk(fromX,fromZ,toX,toZ,step){
-  const dx=toX-fromX, dz=toZ-fromZ;
-  const dist=Math.hypot(dx,dz);
-  if(dist<1e-4)return {x:fromX,z:fromZ,dist:0};
-  const ux=dx/dist, uz=dz/dist;
-  const sx=fromX+ux*step, sz=fromZ+uz*step;
-  if(!pointBlocked(sx,sz))return {x:sx,z:sz,dist};
-  // axis slides
-  const trials=[
-    [fromX+Math.sign(dx)*step, fromZ],
-    [fromX, fromZ+Math.sign(dz)*step],
-  ];
-  // 8-directions around preferred heading
-  for(let i=0;i<8;i++){
-    const ang=Math.atan2(ux,uz)+(i%2?1:-1)*Math.ceil(i/2)*(Math.PI/4);
-    trials.push([fromX+Math.sin(ang)*step, fromZ+Math.cos(ang)*step]);
+function worldToCell(x,z){
+  if(!navGrid)return null;
+  const ix=Math.floor((x-navGrid.minX)/navGrid.cell);
+  const iz=Math.floor((z-navGrid.minZ)/navGrid.cell);
+  if(ix<0||iz<0||ix>=navGrid.cols||iz>=navGrid.rows)return null;
+  return {ix,iz};
+}
+function cellCenter(ix,iz){
+  return {x:navGrid.minX+(ix+0.5)*navGrid.cell, z:navGrid.minZ+(iz+0.5)*navGrid.cell};
+}
+function cellWalkable(ix,iz){
+  if(!navGrid||ix<0||iz<0||ix>=navGrid.cols||iz>=navGrid.rows)return false;
+  return navGrid.walk[iz*navGrid.cols+ix]===1;
+}
+function cellClearance(ix,iz){
+  // chebyshev distance to nearest blocked cell (caps at 3)
+  for(let r=1;r<=3;r++){
+    for(let dz=-r;dz<=r;dz++){
+      for(let dx=-r;dx<=r;dx++){
+        if(Math.max(Math.abs(dx),Math.abs(dz))!==r)continue;
+        if(!cellWalkable(ix+dx,iz+dz))return r-1;
+      }
+    }
   }
+  return 3;
+}
+/** Nearest walkable cell center to (x,z). Prefers open clearance when opts.open. */
+function nearestWalkable(x,z,maxR=18,opts={}){
+  if(!navGrid)rebuildNavGrid();
+  const preferOpen=!!opts.open;
+  const c=worldToCell(x,z);
+  if(c&&cellWalkable(c.ix,c.iz)&&(!preferOpen||cellClearance(c.ix,c.iz)>=1))return cellCenter(c.ix,c.iz);
+  const ix0=c?c.ix:Math.max(0,Math.min(navGrid.cols-1,Math.floor((x-navGrid.minX)/navGrid.cell)));
+  const iz0=c?c.iz:Math.max(0,Math.min(navGrid.rows-1,Math.floor((z-navGrid.minZ)/navGrid.cell)));
   let best=null, bestScore=Infinity;
-  for(const [nx,nz] of trials){
-    if(pointBlocked(nx,nz))continue;
-    const remain=Math.hypot(toX-nx,toZ-nz);
-    const turn=Math.abs(Math.atan2(nx-fromX,nz-fromZ)-Math.atan2(ux,uz));
-    const score=remain+turn*0.15;
-    if(score<bestScore){bestScore=score;best={x:nx,z:nz,dist}}
+  for(let r=0;r<=maxR;r++){
+    for(let dz=-r;dz<=r;dz++){
+      for(let dx=-r;dx<=r;dx++){
+        if(Math.max(Math.abs(dx),Math.abs(dz))!==r)continue;
+        const ix=ix0+dx, iz=iz0+dz;
+        if(!cellWalkable(ix,iz))continue;
+        const p=cellCenter(ix,iz);
+        const d=Math.hypot(p.x-x,p.z-z);
+        const open=preferOpen? (3-cellClearance(ix,iz))*0.55 : 0;
+        const score=d+open;
+        if(score<bestScore){bestScore=score;best=p}
+      }
+    }
+    if(best&&r>=(preferOpen?4:2))break;
   }
-  if(best)return best;
-  // stuck — stay
-  return {x:fromX,z:fromZ,dist};
+  return best||{x,z};
+}
+function lineOfSight(x0,z0,x1,z1){
+  const dist=Math.hypot(x1-x0,z1-z0);
+  if(dist<1e-4)return true;
+  const steps=Math.max(2,Math.ceil(dist/(navGrid.cell*0.45)));
+  for(let i=0;i<=steps;i++){
+    const t=i/steps;
+    const x=x0+(x1-x0)*t, z=z0+(z1-z0)*t;
+    const c=worldToCell(x,z);
+    if(!c||!cellWalkable(c.ix,c.iz))return false;
+  }
+  return true;
+}
+function astarPath(sx,sz,gx,gz){
+  if(!navGrid)rebuildNavGrid();
+  const start=worldToCell(sx,sz)||worldToCell(nearestWalkable(sx,sz).x,nearestWalkable(sx,sz).z);
+  const goalW=nearestWalkable(gx,gz);
+  const goal=worldToCell(goalW.x,goalW.z);
+  if(!start||!goal)return [{x:sx,z:sz},{x:goalW.x,z:goalW.z}];
+  if(!cellWalkable(start.ix,start.iz)){
+    const nw=nearestWalkable(sx,sz); const c=worldToCell(nw.x,nw.z); if(c){start.ix=c.ix;start.iz=c.iz}
+  }
+  const cols=navGrid.cols, rows=navGrid.rows, N=cols*rows;
+  const key=(ix,iz)=>iz*cols+ix;
+  const gScore=new Float32Array(N); gScore.fill(Infinity);
+  const fScore=new Float32Array(N); fScore.fill(Infinity);
+  const came=new Int32Array(N); came.fill(-1);
+  const closed=new Uint8Array(N);
+  const open=[]; // {ix,iz,f}
+  const sK=key(start.ix,start.iz), gK=key(goal.ix,goal.iz);
+  gScore[sK]=0;
+  fScore[sK]=Math.hypot(goal.ix-start.ix,goal.iz-start.iz);
+  open.push({ix:start.ix,iz:start.iz,f:fScore[sK]});
+  const neigh=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+  let found=false; let guard=0;
+  while(open.length&&guard++<N*4){
+    // pop lowest f (linear — grid is small ~2500)
+    let bi=0; for(let i=1;i<open.length;i++) if(open[i].f<open[bi].f)bi=i;
+    const cur=open[bi]; open[bi]=open[open.length-1]; open.pop();
+    const cK=key(cur.ix,cur.iz);
+    if(closed[cK])continue;
+    closed[cK]=1;
+    if(cK===gK){found=true;break}
+    for(const [dx,dz] of neigh){
+      const nix=cur.ix+dx, niz=cur.iz+dz;
+      if(!cellWalkable(nix,niz))continue;
+      // no corner-cut through blocked diagonals
+      if(dx&&dz&&(!cellWalkable(cur.ix+dx,cur.iz)||!cellWalkable(cur.ix,cur.iz+dz)))continue;
+      const nK=key(nix,niz); if(closed[nK])continue;
+      const step=dx&&dz?1.4142:1;
+      const tent=gScore[cK]+step;
+      if(tent>=gScore[nK])continue;
+      came[nK]=cK; gScore[nK]=tent;
+      fScore[nK]=tent+Math.hypot(goal.ix-nix,goal.iz-niz);
+      open.push({ix:nix,iz:niz,f:fScore[nK]});
+    }
+  }
+  const path=[];
+  if(found){
+    let k=gK;
+    while(k>=0){
+      const ix=k%cols, iz=(k/cols)|0;
+      const p=cellCenter(ix,iz); path.push(p);
+      if(k===sK)break;
+      k=came[k];
+    }
+    path.reverse();
+  }else{
+    path.push(cellCenter(start.ix,start.iz), goalW);
+  }
+  // ensure exact goal snapped
+  path[path.length-1]={x:goalW.x,z:goalW.z};
+  return smoothPath(path);
+}
+function smoothPath(path){
+  if(!path||path.length<3)return path||[];
+  const out=[path[0]];
+  let i=0;
+  while(i<path.length-1){
+    let j=path.length-1;
+    while(j>i+1 && !lineOfSight(path[i].x,path[i].z,path[j].x,path[j].z))j--;
+    out.push(path[j]); i=j;
+  }
+  return out;
+}
+function setActorGoal(a,x,z,{force=false}={}){
+  const g=nearestWalkable(x,z);
+  const same=a.goalX!=null && Math.hypot(a.goalX-g.x,a.goalZ-g.z)<0.2;
+  if(!force && same && a.path && a.path.length){a.target.x=g.x;a.target.z=g.z;return}
+  a.goalX=g.x; a.goalZ=g.z; a.target.x=g.x; a.target.z=g.z;
+  const sx=a.group.position.x, sz=a.group.position.z;
+  a.path=astarPath(sx,sz,g.x,g.z);
+  a.pathI=Math.min(1,a.path.length-1);
+  a.stuckAcc=0; a.progX=sx; a.progZ=sz; a.stuckClock=0;
+  a.velX=0; a.velZ=0;
+}
+/** ORCA-lite: preferred vel toward next waypoint, then soft velocity obstacles vs neighbors. */
+function clampToWalkable(x,z){
+  const c=worldToCell(x,z);
+  if(c&&cellWalkable(c.ix,c.iz)&&!pointBlocked(x,z,ACTOR_R*0.92))return {x,z};
+  return nearestWalkable(x,z);
+}
+function avoidStep(a,dt,speed){
+  const g=a.group;
+  let tx=a.goalX, tz=a.goalZ;
+  if(a.path&&a.path.length){
+    while(a.pathI<a.path.length-1){
+      const wp=a.path[a.pathI];
+      if(Math.hypot(wp.x-g.position.x,wp.z-g.position.z)<0.32)a.pathI++;
+      else break;
+    }
+    const wp=a.path[Math.min(a.pathI,a.path.length-1)];
+    tx=wp.x; tz=wp.z;
+  }
+  const dx=tx-g.position.x, dz=tz-g.position.z;
+  const dist=Math.hypot(dx,dz);
+  let pvx=0,pvz=0;
+  if(dist>1e-4){pvx=(dx/dist)*speed; pvz=(dz/dist)*speed}
+  let vx=pvx, vz=pvz;
+  const R=ACTOR_R*2.35;
+  for(const o of actors.values()){
+    if(o===a)continue;
+    const ox=o.group.position.x, oz=o.group.position.z;
+    const ex=g.position.x-ox, ez=g.position.z-oz;
+    const d=Math.hypot(ex,ez);
+    if(d>=R||d<1e-4)continue;
+    const nx=ex/d, nz=ez/d;
+    const ovx=o.velX||0, ovz=o.velZ||0;
+    const rvx=vx-ovx, rvz=vz-ovz;
+    const closing=-(rvx*nx+rvz*nz);
+    const overlap=(R-d)/R;
+    if(closing>0 || d<ACTOR_R*1.85){
+      let sx=-nz, sz=nx;
+      if(sx*pvx+sz*pvz<0){sx=-sx;sz=-sz}
+      // Keep most of preferred speed; bias sideways more than reverse
+      const sep=Math.max(0.25, overlap)*1.6;
+      vx+=nx*sep*0.55 + sx*sep*1.35;
+      vz+=nz*sep*0.55 + sz*sep*1.35;
+    }
+  }
+  const sp=Math.hypot(vx,vz);
+  const maxS=Math.max(speed,0.5);
+  if(sp>maxS){vx*=maxS/sp;vz*=maxS/sp}
+  // Try full step, then axis, then shrink — never accept blocked
+  const candidates=[];
+  const add=(x,z)=>{candidates.push({x,z})}
+  add(g.position.x+vx*dt, g.position.z+vz*dt);
+  add(g.position.x+vx*dt, g.position.z);
+  add(g.position.x, g.position.z+vz*dt);
+  add(g.position.x+vx*dt*0.5, g.position.z+vz*dt*0.5);
+  // side steps along preferred
+  const px=-vz, pz=vx; const plen=Math.hypot(px,pz)||1;
+  add(g.position.x+(px/plen)*speed*dt*0.7, g.position.z+(pz/plen)*speed*dt*0.7);
+  add(g.position.x-(px/plen)*speed*dt*0.7, g.position.z-(pz/plen)*speed*dt*0.7);
+  let best=null, bestScore=Infinity;
+  for(const cand of candidates){
+    const c=worldToCell(cand.x,cand.z);
+    if(!c||!cellWalkable(c.ix,c.iz))continue;
+    if(pointBlocked(cand.x,cand.z,ACTOR_R*0.9))continue;
+    const remain=Math.hypot(tx-cand.x,tz-cand.z);
+    if(remain<bestScore){bestScore=remain;best=cand}
+  }
+  let nx,nz;
+  if(best){nx=best.x;nz=best.z}
+  else{
+    const w=clampToWalkable(g.position.x,g.position.z);
+    nx=w.x; nz=w.z;
+  }
+  // final safety
+  if(pointBlocked(nx,nz,ACTOR_R*0.9)){const w=nearestWalkable(nx,nz);nx=w.x;nz=w.z}
+  a.velX=(nx-g.position.x)/Math.max(dt,1e-3); a.velZ=(nz-g.position.z)/Math.max(dt,1e-3);
+  return {x:nx,z:nz,distToGoal:Math.hypot((a.goalX||tx)-nx,(a.goalZ||tz)-nz), moved:Math.hypot(nx-g.position.x,nz-g.position.z)};
+}
+function agentOccupies(x,z,self,sep=SLOT_SEP*0.85){
+  for(const o of actors.values()){
+    if(o===self)continue;
+    if(Math.hypot(o.group.position.x-x,o.group.position.z-z)<sep)return true;
+  }
+  return false;
+}
+function findFreeNear(x,z,self){
+  const base=nearestWalkable(x,z,18,{open:true});
+  if(!agentOccupies(base.x,base.z,self)&&!pointBlocked(base.x,base.z,ACTOR_R*0.9))return base;
+  for(let ring=1;ring<=8;ring++){
+    for(let k=0;k<ring*6;k++){
+      const ang=(k/(ring*6))*Math.PI*2;
+      const cand=nearestWalkable(base.x+Math.cos(ang)*ring*0.5, base.z+Math.sin(ang)*ring*0.5,18,{open:true});
+      if(pointBlocked(cand.x,cand.z,ACTOR_R*0.9))continue;
+      if(agentOccupies(cand.x,cand.z,self))continue;
+      return cand;
+    }
+  }
+  return base;
+}
+function updateStuck(a,dt,moved,distToGoal){
+  a.stuckClock=(a.stuckClock||0)+dt;
+  if(a.stuckClock<0.2)return;
+  const prevDist=a._prevGoalDist??distToGoal;
+  const goalProg=prevDist-distToGoal;
+  a._prevGoalDist=distToGoal;
+  const footProg=Math.hypot(a.group.position.x-(a.progX||0), a.group.position.z-(a.progZ||0));
+  a.progX=a.group.position.x; a.progZ=a.group.position.z; a.stuckClock=0;
+  if(distToGoal<0.5){a.stuckAcc=0;return}
+  if(goalProg<0.06 && footProg<0.4){
+    a.stuckAcc=(a.stuckAcc||0)+0.2;
+    if(a.stuckAcc>=0.6){
+      a._stuckCycles=(a._stuckCycles||0)+1;
+      // Near goal: soft-park on a free walkable seat so we stop fighting
+      if(distToGoal<4.0 || a._stuckCycles>=2){
+        const park=findFreeNear(a.goalX,a.goalZ,a);
+        a.group.position.x=park.x; a.group.position.z=park.z;
+        a.goalX=park.x; a.goalZ=park.z; a.target.x=park.x; a.target.z=park.z;
+        if(a.homeTarget){a.homeTarget.x=park.x;a.homeTarget.z=park.z}
+        a.path=[{x:park.x,z:park.z}]; a.pathI=0;
+        a.stuckAcc=0; a._prevGoalDist=0; a._stuckCycles=0;
+        return;
+      }
+      if(a.path&&a.pathI<a.path.length-1){
+        a.pathI=Math.min(a.path.length-1, a.pathI+2);
+        const wp=a.path[a.pathI];
+        const hop=findFreeNear(wp.x,wp.z,a);
+        a.group.position.x=hop.x; a.group.position.z=hop.z;
+      }else{
+        const hop=findFreeNear(a.group.position.x+1.2, a.group.position.z+1.2, a);
+        a.group.position.x=hop.x; a.group.position.z=hop.z;
+      }
+      setActorGoal(a,a.goalX,a.goalZ,{force:true});
+      a.stuckAcc=0; a._prevGoalDist=null;
+    }
+  }else{ a.stuckAcc=Math.max(0,(a.stuckAcc||0)-0.35); if(goalProg>0.15)a._stuckCycles=0; }
 }
 
 function buildOffice(){
@@ -804,6 +1064,9 @@ function buildOffice(){
   const screen=box(3.2,1.4,0.08,0x0f172a,{x:2,y:3.2,z:-8.85,emissive:0x22c55e,ei:0.35});root.add(screen);
   // USAGE BOARD — east wall, not cut away with glass
   mountUsageBoard();
+  rebuildNavGrid();
+  if(maxDeskFront){const w=nearestWalkable(maxDeskFront.x,maxDeskFront.z);maxDeskFront.x=w.x;maxDeskFront.z=w.z}
+  if(maxStandPos){const w=nearestWalkable(maxStandPos.x,maxStandPos.z);/* Max can stand slightly in furniture — keep */}
 }
 
 let usageBoardMesh=null, usageBoardTex=null, usageCountdownTimer=null;
@@ -954,8 +1217,7 @@ function updateUsageBoard(){
   }
 }
 
-function slotFor(room,index,total,bot){
-  // Department desk: place in that bot's department zone
+function idealSlot(room,index,total,bot){
   let pos=null;
   if(room==='desk'&&bot){
     const meta=BOT_DEPTS.byName[bot.bot]||BOT_DEPTS.byName[bot]||null;
@@ -972,7 +1234,7 @@ function slotFor(room,index,total,bot){
   }
   if(!pos && room==='lead'){
     const z=zoneMeshes.lead||{origin:new THREE.Vector3(2.5,0,-6.8),w:5.0,d:4.2};
-    pos=new THREE.Vector3(z.origin.x,0,z.origin.z);
+    pos=new THREE.Vector3(z.origin.x+0.2,0,z.origin.z+0.3);
   }
   if(!pos){
     const z=zoneMeshes[room];
@@ -990,9 +1252,34 @@ function slotFor(room,index,total,bot){
       pos=new THREE.Vector3(x0+c*(cols===1?0:dx),0,z0+r*(rows===1?0:dz));
     }
   }
-  const cleared=pushOutOfObstacles(pos.x,pos.z,0.32);
-  pos.x=cleared.x; pos.z=cleared.z;
   return pos;
+}
+/** Reserve a walkable seat/desk slot not overlapping prior reservations. */
+function reserveSlot(room,index,total,bot,taken){
+  const ideal=idealSlot(room,index,total,bot);
+  const base=nearestWalkable(ideal.x,ideal.z,18,{open:true});
+  const tryPoint=(x,z)=>{
+    const w=nearestWalkable(x,z,18,{open:true});
+    for(const t of taken){ if(Math.hypot(w.x-t.x,w.z-t.z)<SLOT_SEP)return null }
+    return w;
+  };
+  let hit=tryPoint(base.x,base.z);
+  if(!hit){
+    for(let ring=1;ring<=10&&!hit;ring++){
+      for(let k=0;k<ring*6;k++){
+        const ang=(k/(ring*6))*Math.PI*2;
+        hit=tryPoint(base.x+Math.cos(ang)*ring*0.55, base.z+Math.sin(ang)*ring*0.55);
+        if(hit)break;
+      }
+    }
+  }
+  if(!hit)hit=base;
+  taken.push(hit);
+  return new THREE.Vector3(hit.x,0,hit.z);
+}
+function slotFor(room,index,total,bot,taken){
+  if(taken)return reserveSlot(room,index,total,bot,taken);
+  const t=[]; return reserveSlot(room,index,total,bot,t);
 }
 
 function headGeo(shape){
@@ -1117,12 +1404,13 @@ function applyBots(instant){
   const by={needs:[],lead:[],desk:[],lounge:[],idle:[]};
   for(const b of bots)by[b.room].push(b);
   const seen=new Set();
+  const takenSlots=[];
   for(const room of ['needs','lead','desk','lounge','idle']){
     const list=by[room];
     list.forEach((b,i)=>{
       seen.add(b.bot);
       let a=actors.get(b.bot);
-      const target=slotFor(room,i,list.length,b);
+      const target=slotFor(room,i,list.length,b,takenSlots);
       if(!a){
         const pid=botId(b.bot); const pmeta=pid&&PORTRAIT_BY_ID[pid];
         const group=pmeta?makePortraitActor(b.color,pmeta,b.accessory||'clipboard'):makeActor(b.color,b.shape||'blob',b.accessory||'clipboard');
@@ -1148,8 +1436,14 @@ function applyBots(instant){
       a.room=room;a.openBlocked=!!b.openBlockedMax;a._partIcon=null;
       if(a.wiggleUntil&&performance.now()<a.wiggleUntil){
         /* hold during click wiggle */
-      }else if(a.summoned){a.target.copy(maxDeskFront||target)}
-      else{a.target.copy(target);if(instant)a.group.position.copy(target)}
+      }else if(a.summoned){
+        const md=maxDeskFront||target;
+        if(instant){const w=nearestWalkable(md.x,md.z);a.group.position.set(w.x,0,w.z)}
+        setActorGoal(a,md.x,md.z);
+      }else{
+        if(instant){a.group.position.copy(target)}
+        setActorGoal(a,target.x,target.z);
+      }
       // body/head keep bot avatar color; ring shows room
       const ringCol=ROOM_COL[room];
       a.group.userData.ring.material.color.setHex(ringCol);
@@ -1193,7 +1487,7 @@ function dismissSummon(){
     g.scale.set(1,1,1);g.rotation.z=0;
     if(ud.body){ud.body.position.y=0.62;ud.body.rotation.z=0}
     if(ud.head)ud.head.position.y=1.18;
-    if(a.homeTarget)a.target.copy(a.homeTarget);
+    if(a.homeTarget)setActorGoal(a,a.homeTarget.x,a.homeTarget.z,{force:true});
   }
   summonedBot=null;
 }
@@ -1203,7 +1497,7 @@ function summonToMax(name){
     const prev=actors.get(summonedBot);
     if(prev){
       prev.summoned=false;prev.wiggleUntil=0;
-      if(prev.homeTarget)prev.target.copy(prev.homeTarget);
+      if(prev.homeTarget)setActorGoal(prev,prev.homeTarget.x,prev.homeTarget.z,{force:true});
       // reset pose
       const g=prev.group,ud=g.userData;
       g.scale.set(1,1,1);g.rotation.z=0;
@@ -1445,19 +1739,31 @@ function animateActors(dt,t){
       g.rotation.z=0;g.scale.set(1,1,1);
       if(ud.body){ud.body.rotation.z=0;ud.body.position.y=0.62}
       if(ud.head)ud.head.position.y=1.18;
-      if(a._postWiggleTarget){a.target.copy(a._postWiggleTarget);a._postWiggleTarget=null}
-      else if(a.summoned&&maxDeskFront)a.target.copy(maxDeskFront);
+      if(a._postWiggleTarget){setActorGoal(a,a._postWiggleTarget.x,a._postWiggleTarget.z,{force:true});a._postWiggleTarget=null}
+      else if(a.summoned&&maxDeskFront)setActorGoal(a,maxDeskFront.x,maxDeskFront.z,{force:true});
     }
-    const dx=a.target.x-g.position.x,dz=a.target.z-g.position.z;
-    const dist=Math.hypot(dx,dz);
-    if(dist>0.05){
-      const speed=Math.min(2.8,1.8+dist*0.35);
-      const step=Math.min(dist,speed*dt);
-      const steered=steerWalk(g.position.x,g.position.z,a.target.x,a.target.z,step);
-      const mx=steered.x-g.position.x, mz=steered.z-g.position.z;
-      g.position.x=steered.x;g.position.z=steered.z;
+    // Keep goal/path in sync (summon or home target)
+    if(a.summoned&&maxDeskFront){
+      const md=nearestWalkable(maxDeskFront.x,maxDeskFront.z);
+      if(!a.goalX||Math.hypot(a.goalX-md.x,a.goalZ-md.z)>0.5)setActorGoal(a,md.x,md.z);
+    }else if(a.homeTarget){
+      const ht=nearestWalkable(a.homeTarget.x,a.homeTarget.z);
+      if(!a.goalX||Math.hypot(a.goalX-ht.x,a.goalZ-ht.z)>0.5)setActorGoal(a,ht.x,ht.z);
+    }
+    const dist=Math.hypot((a.goalX??a.target.x)-g.position.x,(a.goalZ??a.target.z)-g.position.z);
+    // Soft-arrive if someone else is already parked on our exact seat
+    if(dist>0.35 && dist<1.1 && agentOccupies(a.goalX,a.goalZ,a,SLOT_SEP*0.7)){
+      const park=findFreeNear(a.goalX,a.goalZ,a);
+      a.goalX=park.x;a.goalZ=park.z;a.target.x=park.x;a.target.z=park.z;
+      if(a.homeTarget){a.homeTarget.x=park.x;a.homeTarget.z=park.z}
+    }
+    if(dist>0.22){
+      const speed=Math.min(3.5,2.2+dist*0.55);
+      const stepped=avoidStep(a,dt,speed);
+      const mx=stepped.x-g.position.x, mz=stepped.z-g.position.z;
+      g.position.x=stepped.x;g.position.z=stepped.z;
       if(Math.hypot(mx,mz)>1e-4)g.rotation.y=Math.atan2(mx,mz);
-      else if(dist>1e-4)g.rotation.y=Math.atan2(dx,dz);
+      updateStuck(a,dt,stepped.moved,stepped.distToGoal);
       // Real walk: swing legs/arms — not a slide
       const swing=Math.sin(t*12)*0.55;
       if(ud.legL){ud.legL.rotation.x=swing;ud.legR.rotation.x=-swing}
@@ -1466,7 +1772,8 @@ function animateActors(dt,t){
       if(ud.head)ud.head.position.y=1.18+Math.abs(Math.sin(t*12))*0.02;
       a.walk=1;
     }else{
-      g.position.x=a.target.x;g.position.z=a.target.z;
+      g.position.x=a.goalX??a.target.x;g.position.z=a.goalZ??a.target.z;
+      a.velX=0;a.velZ=0;a.stuckAcc=0;
       if(ud.legL){ud.legL.rotation.x=0;ud.legR.rotation.x=0}
       if(ud.armL){ud.armL.rotation.x=0;ud.armR.rotation.x=0}
       ensureActivityFx(a);
@@ -1569,7 +1876,8 @@ document.querySelectorAll('.tod button').forEach(b=>b.onclick=()=>setTod(b.datas
 
 window.__summonBot=(name)=>{summonToMax(name);selectedBot=name;renderPanel(name)};
 window.__dismissSummon=()=>dismissSummon();
-window.__officeProbe=()=>{const a=summonedBot&&actors.get(summonedBot);const dist=a&&a.target?Math.hypot(a.target.x-a.group.position.x,a.target.z-a.group.position.z):null;let labelsTotal=0,labelsVisible=0;for(const act of actors.values()){const lab=act.group.userData.label;if(!lab)continue;labelsTotal++;if(lab.visible)labelsVisible++}return{actorCount:actors.size,obstacleCount:obstacles.length,names:[...actors.keys()],maxOk:!!maxPerson&&!!maxDeskFront,summoned:summonedBot,wiggling:!!(a&&a.wiggleUntil&&performance.now()<a.wiggleUntil),dist,desk:maxDeskFront?{x:maxDeskFront.x,z:maxDeskFront.z}:null,botIdSample:botId('Grok Bot Bot'),portraitCount:[...actors.values()].filter(x=>x.portrait).length,portraitNames:[...actors.values()].filter(x=>x.portrait).map(x=>x.group.userData.bot),panelLink:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('href')||null,panelTarget:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('target')||null,panelRel:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('rel')||null,needsCount:summarizeBots().filter(b=>b.room==='needs').length,labelsTotal,labelsVisible,deskMonitorCount:deskMonitors.length,propCacheSize:propMeshCache.size};};
+window.__officeProbe=()=>{const a=summonedBot&&actors.get(summonedBot);const dist=a&&a.target?Math.hypot(a.target.x-a.group.position.x,a.target.z-a.group.position.z):null;let labelsTotal=0,labelsVisible=0;for(const act of actors.values()){const lab=act.group.userData.label;if(!lab)continue;labelsTotal++;if(lab.visible)labelsVisible++}return{actorCount:actors.size,obstacleCount:obstacles.length,names:[...actors.keys()],maxOk:!!maxPerson&&!!maxDeskFront,summoned:summonedBot,wiggling:!!(a&&a.wiggleUntil&&performance.now()<a.wiggleUntil),dist,desk:maxDeskFront?{x:maxDeskFront.x,z:maxDeskFront.z}:null,botIdSample:botId('Grok Bot Bot'),portraitCount:[...actors.values()].filter(x=>x.portrait).length,portraitNames:[...actors.values()].filter(x=>x.portrait).map(x=>x.group.userData.bot),panelLink:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('href')||null,panelTarget:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('target')||null,panelRel:(document.querySelector('#officePanel h2 a')||{}).getAttribute?.('rel')||null,needsCount:summarizeBots().filter(b=>b.room==='needs').length,labelsTotal,labelsVisible,deskMonitorCount:deskMonitors.length,propCacheSize:propMeshCache.size,navCells:navGrid?navGrid.cols*navGrid.rows:0,navWalkable:navGrid?navGrid.walk.reduce((s,v)=>s+v,0):0,stuckBots:[...actors.values()].filter(x=>(x.stuckAcc||0)>=0.7).map(x=>x.group.userData.bot),positions:[...actors.values()].map(x=>({bot:x.group.userData.bot,x:+x.group.position.x.toFixed(2),z:+x.group.position.z.toFixed(2),goalX:x.goalX,goalZ:x.goalZ,pathLen:(x.path||[]).length,stuck:+(x.stuckAcc||0).toFixed(2)}))};};
+window.__pathApi=()=>({actors,setActorGoal,nearestWalkable,pointBlocked,ACTOR_R,navGrid,cellWalkable,worldToCell,astarPath,obstacles});
 window.__aimMaxDesk=()=>{if(!controls||!maxStandPos)return;controls.target.set(maxStandPos.x,0.7,maxStandPos.z);camera.position.set(maxStandPos.x-6.5,7.2,maxStandPos.z-5.8);controls.update()};
 window.__aimMaxCorner=()=>{if(!controls||!maxStandPos)return;controls.target.set(maxStandPos.x-0.2,0.95,maxStandPos.z+0.15);camera.position.set(maxStandPos.x-5.2,5.6,maxStandPos.z+3.4);controls.update()};
 window.__resetCam=()=>{if(!controls||!camera)return;camera.position.set(-18.5,12.2,-16.5);controls.target.set(-5.2,0.4,-4.0);controls.update()};
@@ -1594,7 +1902,7 @@ function setSimulating(on){
     for(const [room,list] of Object.entries(byRoom)){
       list.forEach((b,i)=>{
         const a=actors.get(b.bot);if(!a)return;
-        a.room=room;a.target.copy(slotFor(room,i,list.length,b));
+        a.room=room;const sp=slotFor(room,i,list.length,b);a.homeTarget.copy(sp);setActorGoal(a,sp.x,sp.z,{force:true});
       });
     }
     updateStats(bots);
