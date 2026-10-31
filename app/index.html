@@ -944,7 +944,7 @@ function applyBots(instant){
         const pid=botId(b.bot); const pmeta=pid&&PORTRAIT_BY_ID[pid];
         const group=pmeta?makePortraitActor(b.color,pmeta,b.accessory||'clipboard'):makeActor(b.color,b.shape||'blob',b.accessory||'clipboard');
         group.userData.bot=b.bot;
-        const label=makeLabel(b.bot,'#94a3b8',1);label.position.set(0,1.62,0);group.add(label);group.userData.label=label;
+        const label=makeLabel(b.bot,'#94a3b8',1,{full:true});label.position.set(0,1.85,0);label.visible=false;group.add(label);group.userData.label=label;
         group.position.copy(instant?target:new THREE.Vector3(0,0,8));
         root.add(group);
         a={group,target:target.clone(),homeTarget:target.clone(),summoned:false,wiggleUntil:0,room,color:b.color,shape:b.shape,portrait:pmeta?pmeta.slug:null,stale:b.stale,bob:Math.random()*Math.PI*2,walk:0};
@@ -955,8 +955,8 @@ function applyBots(instant){
         root.remove(a.group);
         const pmeta2=((id)=>{return id&&PORTRAIT_BY_ID[id]})(botId(b.bot));
         const group=pmeta2?makePortraitActor(b.color,pmeta2,b.accessory||'clipboard'):makeActor(b.color,b.shape||'blob',b.accessory||'clipboard');group.userData.bot=b.bot;
-        const label=makeLabel(b.bot+(b.stale?' · stale':''),'#94a3b8',1);
-        label.position.set(0,1.62,0);group.add(label);group.userData.label=label;
+        const label=makeLabel(b.bot+(b.stale?' · stale':''),'#94a3b8',1,{full:true});
+        label.position.set(0,1.85,0);label.visible=false;group.add(label);group.userData.label=label;
         group.position.copy(pos);group.rotation.y=rot;root.add(group);a.group=group;a.shape=b.shape;a.color=b.color;a.portrait=pmeta2?pmeta2.slug:null;
       }
       a.homeTarget=a.homeTarget||target.clone();a.homeTarget.copy(target);
@@ -983,13 +983,13 @@ function applyBots(instant){
           for(const m of mats){m.transparent=!!b.stale;m.opacity=op}
         });
       }
-      // refresh label — every bot name visible; stacking/leaders in updateLabelVisibility
+      // refresh label text only; visibility is hover/tap via updateLabelVisibility (no leaders)
       const old=a.group.userData.label;a.group.remove(old);if(old.material.map)old.material.map.dispose();old.material.dispose();
-      if(a.group.userData.leader){a.group.remove(a.group.userData.leader);a.group.userData.leader.geometry?.dispose?.();a.group.userData.leader=null}
-      const showFull=(hoveredBot===b.bot||selectedBot===b.bot||a.summoned);
+      if(a.group.userData.leader){a.group.remove(a.group.userData.leader);a.group.userData.leader.geometry?.dispose?.();a.group.userData.leader.material?.dispose?.();a.group.userData.leader=null}
       const suffix=(b.stale?' · stale':'')+(b.workStale?' · work stale':'');
-      const label=makeLabel(b.bot+suffix, '#94a3b8', 1, {full:showFull||true});
-      label.position.set(0, 1.68, 0);
+      const label=makeLabel(b.bot+suffix, '#94a3b8', 1, {full:true});
+      label.position.set(0, 1.85, 0);
+      label.visible=false;
       a.group.add(label);a.group.userData.label=label;a.labelPri=i;
     });
   }
@@ -1063,9 +1063,16 @@ function ensureOffice(){
     raycaster.setFromCamera(pointer,camera);
     const targets=[...actors.values()].map(a=>a.group);
     const hits=raycaster.intersectObjects(targets,true);
-    if(!hits.length){dismissSummon();selectedBot=null;$('#officePanel').classList.remove('open');$('#officePanel').innerHTML='';return}
+    if(!hits.length){
+      hoveredBot=null;
+      dismissSummon();selectedBot=null;$('#officePanel').classList.remove('open');$('#officePanel').innerHTML='';
+      return;
+    }
     let obj=hits[0].object;while(obj&&!(obj.userData&&obj.userData.bot))obj=obj.parent;
-    if(obj&&obj.userData.bot){summonToMax(obj.userData.bot);selectedBot=obj.userData.bot;renderPanel(selectedBot)}
+    if(obj&&obj.userData.bot){
+      hoveredBot=obj.userData.bot; // tap shows tag on touch; desktop click also pins until leave/elsewhere
+      summonToMax(obj.userData.bot);selectedBot=obj.userData.bot;renderPanel(selectedBot);
+    }
   });
   window.addEventListener('resize',resizeOffice);resizeOffice();
   officeReady=true;
@@ -1104,63 +1111,26 @@ function updateCutaway(){
     if(w.sky && mat.emissiveIntensity!=null){/* no-op */}
   }
 }
-function ensureLabelLeader(a, toX, toY){
-  let line=a.group.userData.leader;
-  const fromY=1.32;
-  if(!line){
-    const geo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,fromY,0), new THREE.Vector3(toX,toY,0)]);
-    line=new THREE.Line(geo, new THREE.LineBasicMaterial({color:0xcbd5e1, transparent:true, opacity:0.4, depthTest:false}));
-    line.renderOrder=4;
-    a.group.add(line);
-    a.group.userData.leader=line;
-  }else{
-    const arr=line.geometry.attributes.position.array;
-    arr[0]=0;arr[1]=fromY;arr[2]=0;arr[3]=toX;arr[4]=toY;arr[5]=0;
-    line.geometry.attributes.position.needsUpdate=true;
-  }
-  line.visible=toY>1.9 || Math.abs(toX)>0.08;
-  return line;
-}
-function layoutLabelGroup(group){
-  group.sort((p,q)=>(p.x-q.x)||(p.z-q.z)||p.name.localeCompare(q.name));
-  group.forEach((row,i)=>{
-    const inNeeds=row.room==='needs';
-    if(!inNeeds && !row.force && row.dist>48){
-      row.lab.visible=false;
-      if(row.a.group.userData.leader)row.a.group.userData.leader.visible=false;
-      return;
-    }
-    row.lab.visible=true;
-    row.lab.material.opacity=row.force?0.96:0.88;
-    const step=inNeeds?0.55:0.48;
-    const stackY=1.68 + i*step;
-    const stackX=(i===0)?0: ((i%2)?1:-1)*0.28*Math.ceil(i/2);
-    row.lab.position.set(stackX, stackY, 0);
-    ensureLabelLeader(row.a, stackX, stackY);
-  });
-}
 function updateLabelVisibility(){
-  // Show ALL names. Overlap → vertical stacks + offset leaders (never hide Needs Max).
-  if(!camera)return;
-  const rows=[];
+  // No always-on floating tags or leader lines — one name tag only while hovered/tapped.
   for(const a of actors.values()){
-    const lab=a.group.userData.label;if(!lab)continue;
+    const lab=a.group.userData.label;
+    if(!lab)continue;
     const name=a.group.userData.bot;
-    const force=name===hoveredBot||name===selectedBot||a.summoned;
-    const dist=camera.position.distanceTo(a.group.position);
-    rows.push({a,lab,name,force,dist,room:a.room,x:a.group.position.x,z:a.group.position.z});
+    const show=!!hoveredBot && name===hoveredBot;
+    lab.visible=show;
+    if(show){
+      lab.position.set(0, 1.85, 0);
+      lab.material.opacity=0.96;
+    }
+    const leader=a.group.userData.leader;
+    if(leader){
+      a.group.remove(leader);
+      leader.geometry?.dispose?.();
+      leader.material?.dispose?.();
+      a.group.userData.leader=null;
+    }
   }
-  // Needs Max: one shared stack so the meeting-room cluster doesn't pile plates
-  const needs=rows.filter(r=>r.room==='needs');
-  const rest=rows.filter(r=>r.room!=='needs');
-  layoutLabelGroup(needs);
-  const cells=new Map();
-  for(const row of rest){
-    const key=(Math.round(row.x/1.6))+'_'+(Math.round(row.z/1.6));
-    if(!cells.has(key))cells.set(key,[]);
-    cells.get(key).push(row);
-  }
-  for(const group of cells.values())layoutLabelGroup(group);
 }
 function animateActors(dt,t){
   // research screen animations
@@ -1293,20 +1263,30 @@ function setSimulating(on){
 $('#simBtn')?.addEventListener('click',()=>setSimulating(!simulating));
 if(new URLSearchParams(location.search).get('simulate')==='1'){setTimeout(()=>setSimulating(true),800)}
 
-// Hover/tap → full name (panel already on tap; hover brightens label)
+// Desktop: name tag only while pointer hovers a bot (raycast actor/bust). Touch: set on tap, clear on tap elsewhere (pointerdown).
 let _hoverRc=new THREE.Raycaster(),_hoverPt=new THREE.Vector2();
 function bindHover(){
   if(!renderer)return;
-  renderer.domElement.addEventListener('pointermove',ev=>{
+  const canvas=renderer.domElement;
+  canvas.style.touchAction='none';
+  canvas.addEventListener('pointermove',ev=>{
     if(isMobile())return;
-    const rect=renderer.domElement.getBoundingClientRect();
+    const rect=canvas.getBoundingClientRect();
     _hoverPt.x=((ev.clientX-rect.left)/rect.width)*2-1;
     _hoverPt.y=-((ev.clientY-rect.top)/rect.height)*2+1;
     _hoverRc.setFromCamera(_hoverPt,camera);
     const hits=_hoverRc.intersectObjects([...actors.values()].map(a=>a.group),true);
     let name=null;
     if(hits.length){let o=hits[0].object;while(o&&!(o.userData&&o.userData.bot))o=o.parent;if(o)name=o.userData.bot}
-    if(name!==hoveredBot){hoveredBot=name;/* refresh tags only */applyBots(true)}
+    if(name!==hoveredBot){
+      hoveredBot=name;
+      canvas.style.cursor=name?'pointer':'grab';
+    }
+  });
+  canvas.addEventListener('pointerleave',()=>{
+    if(isMobile())return;
+    hoveredBot=null;
+    canvas.style.cursor='grab';
   });
 }
 
